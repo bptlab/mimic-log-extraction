@@ -39,7 +39,7 @@ def create_db_connection(db_name, db_host, db_user, db_pw):
     """
     Create database connection with supplied parameters
     """
-    con = connect(db_name, db_host, db_user, db_pw)
+    con = connect(dbname=db_name, host=db_host, user=db_user, password=db_pw)
     con.set_client_encoding('utf8')
     return con
 
