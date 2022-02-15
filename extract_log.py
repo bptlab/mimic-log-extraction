@@ -1,19 +1,9 @@
-import string
 from typing import List, Tuple
-import numpy
 from psycopg2 import connect
-import pandas as pd
-import pm4py
-import numpy as np
-import pandasql as ps
-from pm4py.objects.conversion.log import converter as log_converter
 
 import argparse
 
 from extractor import extract_cohort
-
-# todo: fixed requirements.txt
-# todo: setup.py
 
 parser = argparse.ArgumentParser(description='Optional app description')
 
@@ -29,73 +19,86 @@ parser.add_argument('--drg', type=str, help='DRG code(s) of cohort')
 parser.add_argument('--age', type=str, help='Patient Age of cohort')
 
 
-# ask for database connection or read from environment
-def ask_db_settings(args) -> Tuple(str, str, str, str):
+def ask_db_settings(args) -> Tuple[str, str, str, str]:
+    """
+    Ask for database connection or read from environment
+    """
     print("determining and establishing database connection...")
     db_name = args.db_name if args.db_name is not None else str(
-        input("Enter Database Name"))
+        input("Enter Database Name:\n"))
     db_host = args.db_host if args.db_host is not None else str(
-        input("Enter Database Host"))
+        input("Enter Database Host:\n"))
     db_user = args.db_user if args.db_user is not None else str(
-        input("Enter Database User"))
+        input("Enter Database User:\n"))
     db_pw = args.db_pw if args.db_pw is not None else str(
-        input("Enter Database Password"))
+        input("Enter Database Password:\n"))
     return db_name, db_host, db_user, db_pw
-
-# create db connection
 
 
 def create_db_connection(db_name, db_host, db_user, db_pw):
+    """
+    Create database connection with supplied parameters
+    """
     con = connect(db_name, db_host, db_user, db_pw)
     con.set_client_encoding('utf8')
     return con
 
-# ask for patient cohorts
 
-
-def ask_cohorts() -> Tuple(List[str], List[str], List[str]):
+def ask_cohorts() -> Tuple[List[str], List[str], List[str]]:
+    """
+    Ask for patient cohort filters
+    todo: age is always None, so far
+    """
     print("determining patient cohort(s)...")
     icd_string = args.icd if args.icd is not None else str(
-        input("Enter ICD Code(s) seperated by comma"))
+        input("Enter ICD Code(s) seperated by comma:\n"))
     icd_codes = icd_string.split(',')
 
     drg_string = args.drg if args.drg is not None else str(
-        input("Enter DRG Code(s) seperated by comma"))
+        input("Enter DRG Code(s) seperated by comma:\n"))
     drg_codes = drg_string.split(',')
 
+    # todo: age is None as of yet
     age_string = args.age if args.age is not None else str(
-        input("Enter Patient Age(s) seperated by comma"))
+        input("Enter Patient Age(s) seperated by comma:\n"))
     ages = age_string.split(',')
 
-    return icd_codes, drg_codes, ages
-
-# ask for case notion
+    return icd_codes, drg_codes, None
 
 
 def ask_case_notion():
+    """
+    Ask for case notion
+    todo: None per default
+    """
     return None
-
-# ask for case attributes
 
 
 def ask_case_attributes():
+    """
+    Ask for case attributes
+    todo: None per default
+    """
     return None
-
-# ask for event types
 
 
 def ask_event_types():
+    """
+    Ask for event types
+    todo: None per default
+    """
     return None
-
-# ask for event attributes
 
 
 def ask_event_attributes():
+    """
+    Ask for event attributes
+    todo: None per default
+    """
     return None
 
 
 if __name__ == "__main__":
-    # database conn
     args = parser.parse_args()
     db_name, db_host, db_user, db_pw = ask_db_settings(args)
     db_connection = create_db_connection(db_name, db_host, db_user, db_pw)
