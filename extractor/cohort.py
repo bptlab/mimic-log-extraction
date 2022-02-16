@@ -15,12 +15,14 @@ def extract_cohort(db_cursor, icd_codes, drg_codes, ages) -> pd.DataFrame:
     todo: ignores age filter so far
     """
 
+    print("Begin extracting cohort!")
+
     if ages is None or ages == ['']:
         # select all patients
-        print("no age filter")
+        print("No age filter supplied.")
     else:
         # filter patients
-        print("age filter")
+        print("Age filter supplied.")
 
     drgs = extract_drgs(db_cursor)
 
@@ -28,17 +30,18 @@ def extract_cohort(db_cursor, icd_codes, drg_codes, ages) -> pd.DataFrame:
 
     desc_icd = extract_icd_descriptions(db_cursor)
 
-    hf = hf.merge(desc_icd, on="icd_code", how="inner")
+    hf = icds.merge(desc_icd, on="icd_code", how="inner")
 
     if icd_codes is not None:
-        print("using supplied icd codes for cohort")
+        print("Using supplied ICD codes for cohort...")
         icd_filter_list = icd_codes
     else:
-        print("using default icd codes for cohort")
+        print("Using default ICD codes for cohort...")
         icd_filter_list = default_icd_list
 
     # Filter for relevant ICD codes
     hf = filter_icd_df(icds=icds, icd_filter_list=icd_filter_list)
+
     hf = hf.loc[hf["seq_num"] < 4]
 
     hf = hf.reset_index()
@@ -50,10 +53,10 @@ def extract_cohort(db_cursor, icd_codes, drg_codes, ages) -> pd.DataFrame:
 
     # Consider only Heart Failure related DRGs
     if drg_codes is not None:
-        print("using supplied drg codes for cohort")
+        print("Using supplied DRG codes for cohort...")
         drg_filter_list = drg_codes
     else:
-        print("using default drg codes for cohort")
+        print("Using default DRG codes for cohort...")
         drg_filter_list = default_drg_list
 
     drg_filter_list_uppercase = [x.upper() for x in drg_filter_list]
@@ -64,5 +67,7 @@ def extract_cohort(db_cursor, icd_codes, drg_codes, ages) -> pd.DataFrame:
     hf_filter.drop("index", axis=1, inplace=True)
 
     hf_filter.to_csv("output/Cohort_full.csv")
+
+    print("Done extracting cohort!")
 
     return hf_filter
