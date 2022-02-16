@@ -47,23 +47,24 @@ def create_db_connection(db_name, db_host, db_user, db_pw):
 def ask_cohorts() -> Tuple[List[str], List[str], List[str]]:
     """
     Ask for patient cohort filters
-    todo: age is always None, so far
     """
-    print("determining patient cohort(s)...")
+    print("Determining patient cohort...")
     icd_string = args.icd if args.icd is not None else str(
-        input("Enter ICD Code(s) seperated by comma:\n"))
+        input("Enter ICD code(s) seperated by comma:\n"))
     icd_codes = icd_string.split(',')
+    icd_codes = None if icd_codes == [''] else icd_codes
 
     drg_string = args.drg if args.drg is not None else str(
-        input("Enter DRG Code(s) seperated by comma:\n"))
+        input("Enter DRG code(s) seperated by comma:\n"))
     drg_codes = drg_string.split(',')
+    drg_codes = None if drg_codes == [''] else drg_codes
 
-    # todo: age is None as of yet
     age_string = args.age if args.age is not None else str(
         input("Enter Patient Age(s) seperated by comma:\n"))
     ages = age_string.split(',')
+    ages = None if ages == [''] else ages
 
-    return icd_codes, drg_codes, None
+    return icd_codes, drg_codes, ages
 
 
 def ask_case_notion():
