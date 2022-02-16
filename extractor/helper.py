@@ -62,7 +62,7 @@ def filter_drg_df(hf_drg: pd.DataFrame, drg_filter_list: List[str]) -> pd.DataFr
 
 def get_filename_string(file_name: str, file_ending: str) -> str:
     date = datetime.now().strftime("%d-%m-%Y-%H_%M_%S")
-    return file_name + date + file_ending
+    return file_name + "_" + date + file_ending
 
 
 default_icd_list = ["42821", "42823", "42831",
