@@ -4,6 +4,7 @@ Provides helper methods for extraction of data frames from Mimic
 
 import pandas as pd
 from typing import List
+from datetime import datetime
 
 
 def extract_icd_descriptions(cursor) -> pd.DataFrame:
@@ -57,6 +58,11 @@ def filter_drg_df(hf_drg: pd.DataFrame, drg_filter_list: List[str]) -> pd.DataFr
     hf_filter = hf_drg.loc[hf_drg["description"].isin(
         drg_filter_list)]
     return hf_filter
+
+
+def get_filename_string(file_name: str, file_ending: str) -> str:
+    date = datetime.now().strftime("%d/%m/%Y%H_%M_%S")
+    return file_name + date + file_ending
 
 
 default_icd_list = ["42821", "42823", "42831",

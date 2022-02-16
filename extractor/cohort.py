@@ -4,7 +4,7 @@ from psycopg2 import connect
 import pandas as pd
 import numpy as np
 
-from .helper import (extract_drgs, extract_icds, filter_icd_df, filter_drg_df,
+from .helper import (extract_drgs, extract_icds, filter_icd_df, filter_drg_df, get_filename_string,
                      extract_icd_descriptions, default_icd_list, default_drg_list)
 
 
@@ -16,6 +16,20 @@ def extract_cohort(db_cursor, icd_codes, drg_codes, ages) -> pd.DataFrame:
     """
 
     print("Begin extracting cohort!")
+
+    if icd_codes is not None:
+        print("Using supplied ICD codes for cohort...")
+        icd_filter_list = icd_codes
+    else:
+        print("Using default ICD codes for cohort...")
+        icd_filter_list = default_icd_list
+
+    if drg_codes is not None:
+        print("Using supplied DRG codes for cohort...")
+        drg_filter_list = drg_codes
+    else:
+        print("Using default DRG codes for cohort...")
+        drg_filter_list = default_drg_list
 
     if ages is None or ages == ['']:
         # select all patients
@@ -32,13 +46,6 @@ def extract_cohort(db_cursor, icd_codes, drg_codes, ages) -> pd.DataFrame:
 
     hf = icds.merge(desc_icd, on="icd_code", how="inner")
 
-    if icd_codes is not None:
-        print("Using supplied ICD codes for cohort...")
-        icd_filter_list = icd_codes
-    else:
-        print("Using default ICD codes for cohort...")
-        icd_filter_list = default_icd_list
-
     # Filter for relevant ICD codes
     hf = filter_icd_df(icds=icds, icd_filter_list=icd_filter_list)
 
@@ -51,14 +58,6 @@ def extract_cohort(db_cursor, icd_codes, drg_codes, ages) -> pd.DataFrame:
 
     hf_drg = hf_drg.loc[hf_drg["drg_type"] == "APR"]
 
-    # Consider only Heart Failure related DRGs
-    if drg_codes is not None:
-        print("Using supplied DRG codes for cohort...")
-        drg_filter_list = drg_codes
-    else:
-        print("Using default DRG codes for cohort...")
-        drg_filter_list = default_drg_list
-
     drg_filter_list_uppercase = [x.upper() for x in drg_filter_list]
 
     hf_filter = filter_drg_df(hf_drg, drg_filter_list_uppercase)
@@ -66,7 +65,9 @@ def extract_cohort(db_cursor, icd_codes, drg_codes, ages) -> pd.DataFrame:
     hf_filter = hf_filter.reset_index()
     hf_filter.drop("index", axis=1, inplace=True)
 
-    hf_filter.to_csv("output/Cohort_full.csv")
+    filename = get_filename_string("cohort_full", ".csv")
+
+    hf_filter.to_csv("output/" + filename)
 
     print("Done extracting cohort!")
 
