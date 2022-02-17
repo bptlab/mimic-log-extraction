@@ -1,11 +1,14 @@
+import sys
 from typing import List, Tuple
 from psycopg2 import connect
 
 import argparse
 
-from extractor import extract_cohort
+from extractor import (extract_cohort, extract_admission_events)
 
 parser = argparse.ArgumentParser(description='Optional app description')
+
+# Todo: sanity check argument inputs before using later on!
 
 # Database Parameters
 parser.add_argument('--db_name', type=str, help='Database Name')
@@ -17,6 +20,9 @@ parser.add_argument('--db_pw', type=str, help='Database Password')
 parser.add_argument('--icd', type=str, help='ICD code(s) of cohort')
 parser.add_argument('--drg', type=str, help='DRG code(s) of cohort')
 parser.add_argument('--age', type=str, help='Patient Age of cohort')
+
+# Event Type Parameter
+parser.add_argument('--type', type=str, help='Event Type')
 
 
 def ask_db_settings(args) -> Tuple[str, str, str, str]:
@@ -69,7 +75,7 @@ def ask_cohorts() -> Tuple[List[str], List[str], List[str]]:
 
 def ask_case_notion():
     """
-    Ask for case notion
+    Ask for case notion: Subject_Id or Hospital_Admission_Id
     todo: None per default
     """
     return None
@@ -83,12 +89,17 @@ def ask_case_attributes():
     return None
 
 
-def ask_event_types():
+def ask_event_type():
     """
-    Ask for event types
+    Ask for event types: Admission, Transfer, ...?
     todo: None per default
     """
-    return None
+    type_string = args.type if args.type is not None else str(
+        input("Choose Event Type: Admission, Transfer, ?\n"))
+
+    if type_string.upper() not in ['ADMISSION']:
+        sys.exit("No valid event type provided.")
+    return type_string.upper()
 
 
 def ask_event_attributes():
@@ -111,10 +122,13 @@ if __name__ == "__main__":
 
     case_attributes = ask_case_attributes()
 
-    event_types = ask_event_types()
+    event_type = ask_event_type()
 
     event_attributes = ask_event_attributes()
 
     # build cohort
     cohort = extract_cohort(db_cursor, cohort_icd_codes,
                             cohort_drg_codes, cohort_age)
+
+    if event_type == "ADMISSION":
+        events = extract_admission_events(db_cursor, cohort)

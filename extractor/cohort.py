@@ -66,7 +66,6 @@ def extract_cohort(db_cursor, icd_codes, drg_codes, ages) -> pd.DataFrame:
     hf_filter.drop("index", axis=1, inplace=True)
 
     filename = get_filename_string("cohort_full", ".csv")
-
     hf_filter.to_csv("output/" + filename)
 
     print("Done extracting cohort!")

@@ -60,6 +60,33 @@ def filter_drg_df(hf_drg: pd.DataFrame, drg_filter_list: List[str]) -> pd.DataFr
     return hf_filter
 
 
+def extract_triage_stays_for_ed_stays(db_cursor, ed_stays):
+    db_cursor.execute(
+        'SELECT * FROM mimic_ed.triage where stay_id = any(%s)', [ed_stays])
+    triage = db_cursor.fetchall()
+    cols = list(map(lambda x: x[0], db_cursor.description))
+    triage = pd.DataFrame(triage, columns=cols)
+    return triage
+
+
+def extract_ed_stays_for_hadms(db_cursor, hadms):
+    db_cursor.execute(
+        'SELECT * FROM mimic_ed.edstays where hadm_id = any(%s)', [hadms])
+    ed_stay = db_cursor.fetchall()
+    cols = list(map(lambda x: x[0], db_cursor.description))
+    ed_stay = pd.DataFrame(ed_stay, columns=cols)
+    return ed_stay
+
+
+def extract_admissions_for_hadms(db_cursor, hadms):
+    db_cursor.execute(
+        'SELECT * FROM mimic_core.admissions where hadm_id = any(%s)', [hadms])
+    adm = db_cursor.fetchall()
+    cols = list(map(lambda x: x[0], db_cursor.description))
+    adm = pd.DataFrame(adm, columns=cols)
+    return adm
+
+
 def get_filename_string(file_name: str, file_ending: str) -> str:
     date = datetime.now().strftime("%d-%m-%Y-%H_%M_%S")
     return file_name + "_" + date + file_ending
