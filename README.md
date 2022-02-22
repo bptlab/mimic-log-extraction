@@ -3,6 +3,23 @@
 - requires python 3.8.10 (newer versions might be fine, though)
 - using a python virtual environment seems like a good idea
 
+## usage
+
+```
+usage: extract_log.py [-h] [--db_name DB_NAME] [--db_host DB_HOST] [--db_user DB_USER] [--db_pw DB_PW] [--icd ICD] [--drg DRG] [--age AGE] [--type TYPE]
+
+optional arguments:
+  -h, --help         show this help message and exit
+  --db_name DB_NAME  Database Name
+  --db_host DB_HOST  Database Host
+  --db_user DB_USER  Database User
+  --db_pw DB_PW      Database Password
+  --icd ICD          ICD code(s) of cohort
+  --drg DRG          DRG code(s) of cohort
+  --age AGE          Patient Age of cohort
+  --type TYPE        Event Type
+```
+
 ## installation
 
 Simply run the pip installation command to install the extraction tool:

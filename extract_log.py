@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sys
 from typing import List, Tuple
 from psycopg2 import connect
