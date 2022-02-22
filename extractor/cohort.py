@@ -44,30 +44,30 @@ def extract_cohort(db_cursor, icd_codes, drg_codes, ages) -> pd.DataFrame:
 
     desc_icd = extract_icd_descriptions(db_cursor)
 
-    hf = icds.merge(desc_icd, on="icd_code", how="inner")
+    cohort = icds.merge(desc_icd, on="icd_code", how="inner")
 
     # Filter for relevant ICD codes
-    hf = filter_icd_df(icds=icds, icd_filter_list=icd_filter_list)
+    cohort = filter_icd_df(icds=icds, icd_filter_list=icd_filter_list)
 
-    hf = hf.loc[hf["seq_num"] < 4]
+    cohort = cohort.loc[cohort["seq_num"] < 4]
 
-    hf = hf.reset_index()
-    hf = hf.drop("index", axis=1)
+    cohort = cohort.reset_index()
+    cohort = cohort.drop("index", axis=1)
 
-    hf_drg = drgs.loc[drgs["hadm_id"].isin(list(hf["hadm_id"]))]
+    drg_cohort = drgs.loc[drgs["hadm_id"].isin(list(cohort["hadm_id"]))]
 
-    hf_drg = hf_drg.loc[hf_drg["drg_type"] == "APR"]
+    drg_cohort = drg_cohort.loc[drg_cohort["drg_type"] == "APR"]
 
     drg_filter_list_uppercase = [x.upper() for x in drg_filter_list]
 
-    hf_filter = filter_drg_df(hf_drg, drg_filter_list_uppercase)
-    hf_filter = hf_filter.sort_values(["hadm_id", "drg_code"])
-    hf_filter = hf_filter.reset_index()
-    hf_filter.drop("index", axis=1, inplace=True)
+    filtered_cohort = filter_drg_df(drg_cohort, drg_filter_list_uppercase)
+    filtered_cohort = filtered_cohort.sort_values(["hadm_id", "drg_code"])
+    filtered_cohort = filtered_cohort.reset_index()
+    filtered_cohort.drop("index", axis=1, inplace=True)
 
     filename = get_filename_string("cohort_full", ".csv")
-    hf_filter.to_csv("output/" + filename)
+    filtered_cohort.to_csv("output/" + filename)
 
     print("Done extracting cohort!")
 
-    return hf_filter
+    return filtered_cohort

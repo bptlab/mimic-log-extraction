@@ -1,0 +1,33 @@
+{
+    "version": "0.2",
+    "ignorePaths": [],
+    "dictionaryDefinitions": [],
+    "dictionaries": [],
+    "words": [
+        "Cath",
+        "Circ",
+        "dischtime",
+        "drgcodes",
+        "drgs",
+        "edouttime",
+        "edregtime",
+        "edstays",
+        "hadm",
+        "hadms",
+        "Hematocrit",
+        "icds",
+        "iloc",
+        "inplace",
+        "intime",
+        "Ischemic",
+        "isin",
+        "isna",
+        "itemid",
+        "iterrows",
+        "psycopg",
+        "pulseoxymetry",
+        "sqldf"
+    ],
+    "ignoreWords": [],
+    "import": []
+}

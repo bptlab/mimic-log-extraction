@@ -69,18 +69,18 @@ def extract_triage_stays_for_ed_stays(db_cursor, ed_stays):
     return triage
 
 
-def extract_ed_stays_for_hadms(db_cursor, hadms):
+def extract_emergency_department_stays_for_admission_ids(db_cursor, hospital_admission_ids):
     db_cursor.execute(
-        'SELECT * FROM mimic_ed.edstays where hadm_id = any(%s)', [hadms])
-    ed_stay = db_cursor.fetchall()
+        'SELECT * FROM mimic_ed.edstays where hadm_id = any(%s)', [hospital_admission_ids])
+    ed_stays = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
-    ed_stay = pd.DataFrame(ed_stay, columns=cols)
-    return ed_stay
+    ed_stays = pd.DataFrame(ed_stays, columns=cols)
+    return ed_stays
 
 
-def extract_admissions_for_hadms(db_cursor, hadms):
+def extract_admissions_for_admission_ids(db_cursor, hospital_admission_ids):
     db_cursor.execute(
-        'SELECT * FROM mimic_core.admissions where hadm_id = any(%s)', [hadms])
+        'SELECT * FROM mimic_core.admissions where hadm_id = any(%s)', [hospital_admission_ids])
     adm = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
     adm = pd.DataFrame(adm, columns=cols)
