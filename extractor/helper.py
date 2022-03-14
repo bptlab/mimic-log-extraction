@@ -1,9 +1,12 @@
 """
 Provides helper methods for extraction of data frames from Mimic
 """
+import logging
 from typing import List
 from datetime import datetime
 import pandas as pd
+
+logger = logging.getLogger('cli')
 
 
 def extract_icd_descriptions(cursor) -> pd.DataFrame:

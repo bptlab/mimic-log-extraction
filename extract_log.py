@@ -4,6 +4,7 @@
 Provides the main CLI functionality for extracting configurable event logs out of a Mimic Database
 """
 import argparse
+import logging
 import sys
 
 from typing import List, Tuple
@@ -12,7 +13,16 @@ from psycopg2 import connect
 
 from extractor import (extract_cohort, extract_admission_events)
 
-parser = argparse.ArgumentParser(description='Optional app description')
+formatter = logging.Formatter(
+    fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
+handler = logging.StreamHandler()
+handler.setFormatter(formatter)
+logger = logging.getLogger('cli')
+logger.setLevel(logging.DEBUG)
+logger.addHandler(handler)
+
+parser = argparse.ArgumentParser(
+    description='A CLI tool for extracting event logs out of MIMIC Databases.')
 
 # Todo: sanity check argument inputs before using later on!
 
@@ -35,7 +45,7 @@ def ask_db_settings(input_arguments) -> Tuple[str, str, str, str]:
     """
     Ask for database connection or read from environment
     """
-    print("determining and establishing database connection...")
+    logger.info("Determining and establishing database connection...")
     input_db_name = input_arguments.db_name if input_arguments.db_name is not None else str(
         input("Enter Database Name:\n"))
     input_db_host = input_arguments.db_host if input_arguments.db_host is not None else str(
@@ -60,7 +70,7 @@ def ask_cohorts() -> Tuple[List[str], List[str], List[str]]:
     """
     Ask for patient cohort filters
     """
-    print("Determining patient cohort...")
+    logger.info("Determining patient cohort...")
     icd_string = args.icd if args.icd is not None else str(
         input("Enter ICD code(s) seperated by comma:\n"))
     icd_codes = icd_string.split(',')
@@ -100,10 +110,14 @@ def ask_event_type():
     Ask for event types: Admission, Transfer, ...?
     Todo: None per default
     """
+    implemented_event_types = ['ADMISSION', 'TRANSFER']
+
     type_string = args.type if args.type is not None else str(
         input("Choose Event Type: Admission, Transfer, ?\n"))
 
-    if type_string.upper() not in ['ADMISSION']:
+    if type_string.upper() not in implemented_event_types:
+        logger.error("The input provided was not in %s",
+                     implemented_event_types)
         sys.exit("No valid event type provided.")
     return type_string.upper()
 

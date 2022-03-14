@@ -1,12 +1,14 @@
 """
 Provides functionality to generate admission event logs for a given cohort
 """
-
+import logging
 import pandas as pd
-
 from .helper import (get_filename_string, extract_admissions_for_admission_ids,
                      extract_emergency_department_stays_for_admission_ids,
                      extract_triage_stays_for_ed_stays)
+
+
+logger = logging.getLogger('cli')
 
 
 def extract_admission_events(db_cursor, cohort) -> pd.DataFrame:
@@ -14,7 +16,7 @@ def extract_admission_events(db_cursor, cohort) -> pd.DataFrame:
     Extracts transfer events for a given cohort
     """
 
-    print("Begin extracting admission events!")
+    logger.info("Begin extracting admission events!")
 
     hospital_admission_ids = list(cohort["hadm_id"].unique())
     hospital_admission_ids = [float(i) for i in hospital_admission_ids]
@@ -70,6 +72,6 @@ def extract_admission_events(db_cursor, cohort) -> pd.DataFrame:
     filename = get_filename_string("admission_log", ".csv")
     log.to_csv("output/" + filename)
 
-    print("Done extracting admission events!")
+    logger.info("Done extracting admission events!")
 
     return log
