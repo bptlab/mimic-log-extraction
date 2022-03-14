@@ -1,10 +1,9 @@
 """
 Provides helper methods for extraction of data frames from Mimic
 """
-
-import pandas as pd
 from typing import List
 from datetime import datetime
+import pandas as pd
 
 
 def extract_icd_descriptions(cursor) -> pd.DataFrame:

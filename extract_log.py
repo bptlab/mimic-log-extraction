@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
+
+"""
+Provides the main CLI functionality for extracting configurable event logs out of a Mimic Database
+"""
+import argparse
 import sys
+
 from typing import List, Tuple
 from psycopg2 import connect
 
-import argparse
 
 from extractor import (extract_cohort, extract_admission_events)
 
@@ -26,27 +31,27 @@ parser.add_argument('--age', type=str, help='Patient Age of cohort')
 parser.add_argument('--type', type=str, help='Event Type')
 
 
-def ask_db_settings(args) -> Tuple[str, str, str, str]:
+def ask_db_settings(input_arguments) -> Tuple[str, str, str, str]:
     """
     Ask for database connection or read from environment
     """
     print("determining and establishing database connection...")
-    db_name = args.db_name if args.db_name is not None else str(
+    input_db_name = input_arguments.db_name if input_arguments.db_name is not None else str(
         input("Enter Database Name:\n"))
-    db_host = args.db_host if args.db_host is not None else str(
+    input_db_host = input_arguments.db_host if input_arguments.db_host is not None else str(
         input("Enter Database Host:\n"))
-    db_user = args.db_user if args.db_user is not None else str(
+    input_db_user = input_arguments.db_user if input_arguments.db_user is not None else str(
         input("Enter Database User:\n"))
-    db_pw = args.db_pw if args.db_pw is not None else str(
+    input_db_password = input_arguments.db_pw if input_arguments.db_pw is not None else str(
         input("Enter Database Password:\n"))
-    return db_name, db_host, db_user, db_pw
+    return input_db_name, input_db_host, input_db_user, input_db_password
 
 
-def create_db_connection(db_name, db_host, db_user, db_pw):
+def create_db_connection(name, host, user, password):
     """
     Create database connection with supplied parameters
     """
-    con = connect(dbname=db_name, host=db_host, user=db_user, password=db_pw)
+    con = connect(dbname=name, host=host, user=user, password=password)
     con.set_client_encoding('utf8')
     return con
 
@@ -77,7 +82,7 @@ def ask_cohorts() -> Tuple[List[str], List[str], List[str]]:
 def ask_case_notion():
     """
     Ask for case notion: Subject_Id or Hospital_Admission_Id
-    todo: None per default
+    Todo: None per default
     """
     return None
 
@@ -85,7 +90,7 @@ def ask_case_notion():
 def ask_case_attributes():
     """
     Ask for case attributes
-    todo: None per default
+    Todo: None per default
     """
     return None
 
@@ -93,7 +98,7 @@ def ask_case_attributes():
 def ask_event_type():
     """
     Ask for event types: Admission, Transfer, ...?
-    todo: None per default
+    Todo: None per default
     """
     type_string = args.type if args.type is not None else str(
         input("Choose Event Type: Admission, Transfer, ?\n"))
@@ -106,7 +111,7 @@ def ask_event_type():
 def ask_event_attributes():
     """
     Ask for event attributes
-    todo: None per default
+    Todo: None per default
     """
     return None
 
@@ -119,13 +124,13 @@ if __name__ == "__main__":
 
     cohort_icd_codes, cohort_drg_codes, cohort_age = ask_cohorts()
 
-    case_notion = ask_case_notion()
+    # case_notion = ask_case_notion()
 
-    case_attributes = ask_case_attributes()
+    # case_attributes = ask_case_attributes()
 
     event_type = ask_event_type()
 
-    event_attributes = ask_event_attributes()
+    # event_attributes = ask_event_attributes()
 
     # build cohort
     cohort = extract_cohort(db_cursor, cohort_icd_codes,

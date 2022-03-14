@@ -1,8 +1,7 @@
-
-import numpy as np
-from psycopg2 import connect
+"""
+Provides functionality for extracting a cohort defined by ICD and DRG codes, as well as patient ages
+"""
 import pandas as pd
-import numpy as np
 
 from .helper import (extract_drgs, extract_icds, filter_icd_df, filter_drg_df, get_filename_string,
                      extract_icd_descriptions, default_icd_list, default_drg_list)
@@ -12,7 +11,7 @@ def extract_cohort(db_cursor, icd_codes, drg_codes, ages) -> pd.DataFrame:
     """
     Selects a cohort of patient filtered by age,
     as well as ICD and DRG codes.
-    todo: ignores age filter so far
+    Todo: ignores age filter so far
     """
 
     print("Begin extracting cohort!")

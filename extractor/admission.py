@@ -1,8 +1,12 @@
-from psycopg2 import connect
+"""
+Provides functionality to generate admission event logs for a given cohort
+"""
+
 import pandas as pd
 
 from .helper import (get_filename_string, extract_admissions_for_admission_ids,
-                     extract_emergency_department_stays_for_admission_ids, extract_triage_stays_for_ed_stays)
+                     extract_emergency_department_stays_for_admission_ids,
+                     extract_triage_stays_for_ed_stays)
 
 
 def extract_admission_events(db_cursor, cohort) -> pd.DataFrame:
@@ -37,28 +41,30 @@ def extract_admission_events(db_cursor, cohort) -> pd.DataFrame:
                         'language', 'marital_status', 'ethnicity']
 
     log = pd.DataFrame()
-    d = {}
+    event_dict = {}
     i = 0
     for _, row in admissions.iterrows():
         ed_reg_row = ed_reg_info.loc[ed_reg_info["hadm_id"] == row["hadm_id"]]
-        if(pd.isnull(row["deathtime"])):
-            l = ["admittime", "dischtime", "edregtime", "edouttime"]
+        if pd.isnull(row["deathtime"]):
+            column_labels = ["admittime",
+                             "dischtime", "edregtime", "edouttime"]
         else:
-            l = ["admittime", "deathtime", "edregtime", "edouttime"]
+            column_labels = ["admittime",
+                             "deathtime", "edregtime", "edouttime"]
         for col in admissions.columns:
-            if(col in l):
+            if col in column_labels:
                 activity = col.replace('time', '')
                 new_row = {"case_id": row["subject_id"],
                            "activity": activity, "timestamp": row[col]}
-                if (col == "admittime"):
+                if col == "admittime":
                     for e_at in admission_config:
                         new_row[e_at] = row[e_at]
-                if ((col == "edregtime") & (len(ed_reg_row) > 0)):
+                if (col == "edregtime") & (len(ed_reg_row) > 0):
                     for e_at in ed_reg_config:
                         new_row[e_at] = ed_reg_row[e_at].iloc[0]
-                d[i] = new_row
+                event_dict[i] = new_row
                 i = i + 1
-    log = pd.DataFrame.from_dict(d, "index")
+    log = pd.DataFrame.from_dict(event_dict, "index")  # type: ignore
     log = log.sort_values("timestamp")
 
     filename = get_filename_string("admission_log", ".csv")

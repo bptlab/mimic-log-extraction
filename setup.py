@@ -32,7 +32,8 @@ setup(
             'mypy==0.940',
             'mypy-extensions==0.4.3',
             'data-science-types==0.2.23',
-            'pylint==2.12.2'
+            'pylint==2.12.2',
+            'types-psycopg2==2.9.8 '
         ]
     },
     include_package_data=True,
