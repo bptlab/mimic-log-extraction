@@ -6,6 +6,7 @@
     "words": [
         "Cath",
         "Circ",
+        "dbname",
         "dischtime",
         "drgcodes",
         "drgs",
@@ -24,9 +25,13 @@
         "isna",
         "itemid",
         "iterrows",
+        "mypy",
         "psycopg",
         "pulseoxymetry",
-        "sqldf"
+        "pylint",
+        "sqldf",
+        "venv",
+        "virtualenv"
     ],
     "ignoreWords": [],
     "import": []

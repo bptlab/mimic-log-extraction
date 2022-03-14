@@ -5,7 +5,7 @@
 
 ## usage
 
-```
+```bash
 usage: extract_log.py [-h] [--db_name DB_NAME] [--db_host DB_HOST] [--db_user DB_USER] [--db_pw DB_PW] [--icd ICD] [--drg DRG] [--age AGE] [--type TYPE]
 
 optional arguments:

@@ -4,13 +4,14 @@
 	// List of extensions which should be recommended for users of this workspace.
 	"recommendations": [
 		"ms-python.python",
-		"DavidAnson.vscode-markdownlint",
+		"davidanson.vscode-markdownlint",
 		"ms-python.vscode-pylance",
 		"ms-toolsai.jupyter",
 		"ms-toolsai.jupyter-keymap",
 		"ms-toolsai.jupyter-renderers",
-		"VisualStudioExptTeam.vscodeintellicode",
-		"wayou.vscode-todo-highlight"
+		"visualstudioexptteam.vscodeintellicode",
+		"wayou.vscode-todo-highlight",
+		"matangover.mypy"
 	],
 	// List of extensions recommended by VS Code that should not be recommended for users of this workspace.
 	"unwantedRecommendations": []
