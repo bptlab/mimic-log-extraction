@@ -1,6 +1,4 @@
-"""
-Provides functionality to generate admission event logs for a given cohort
-"""
+"""Provides functionality to generate admission event logs for a given cohort"""
 import logging
 import pandas as pd
 from .helper import (get_filename_string, extract_admissions_for_admission_ids,

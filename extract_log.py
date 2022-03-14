@@ -42,9 +42,7 @@ parser.add_argument('--type', type=str, help='Event Type')
 
 
 def ask_db_settings(input_arguments) -> Tuple[str, str, str, str]:
-    """
-    Ask for database connection or read from environment
-    """
+    """Ask for database connection or read from environment"""
     logger.info("Determining and establishing database connection...")
     input_db_name = input_arguments.db_name if input_arguments.db_name is not None else str(
         input("Enter Database Name:\n"))
@@ -58,18 +56,14 @@ def ask_db_settings(input_arguments) -> Tuple[str, str, str, str]:
 
 
 def create_db_connection(name, host, user, password):
-    """
-    Create database connection with supplied parameters
-    """
+    """Create database connection with supplied parameters"""
     con = connect(dbname=name, host=host, user=user, password=password)
     con.set_client_encoding('utf8')
     return con
 
 
 def ask_cohorts() -> Tuple[List[str], List[str], List[str]]:
-    """
-    Ask for patient cohort filters
-    """
+    """Ask for patient cohort filters"""
     logger.info("Determining patient cohort...")
     icd_string = args.icd if args.icd is not None else str(
         input("Enter ICD code(s) seperated by comma:\n"))
@@ -90,26 +84,19 @@ def ask_cohorts() -> Tuple[List[str], List[str], List[str]]:
 
 
 def ask_case_notion():
-    """
-    Ask for case notion: Subject_Id or Hospital_Admission_Id
-    Todo: None per default
-    """
+    """Ask for case notion: Subject_Id or Hospital_Admission_Id"""
+    # Todo: None per default
     return None
 
 
 def ask_case_attributes():
-    """
-    Ask for case attributes
-    Todo: None per default
-    """
+    """Ask for case attributes"""
+    # Todo: None per default
     return None
 
 
 def ask_event_type():
-    """
-    Ask for event types: Admission, Transfer, ...?
-    Todo: None per default
-    """
+    """Ask for event types: Admission, Transfer, ...?"""
     implemented_event_types = ['ADMISSION', 'TRANSFER']
 
     type_string = args.type if args.type is not None else str(
@@ -123,10 +110,8 @@ def ask_event_type():
 
 
 def ask_event_attributes():
-    """
-    Ask for event attributes
-    Todo: None per default
-    """
+    """Ask for event attributes"""
+    # Todo: None per default
     return None
 
 

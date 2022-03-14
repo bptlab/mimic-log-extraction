@@ -10,6 +10,7 @@ logger = logging.getLogger('cli')
 
 
 def extract_icd_descriptions(cursor) -> pd.DataFrame:
+    """Extract ICD Codes and descriptions"""
     cursor.execute("SELECT * FROM mimic_hosp.d_icd_diagnoses")
     desc_icd = cursor.fetchall()
     cols = list(map(lambda x: x[0], cursor.description))
@@ -19,6 +20,7 @@ def extract_icd_descriptions(cursor) -> pd.DataFrame:
 
 
 def extract_icds(cursor) -> pd.DataFrame:
+    """Extract ICD Codes"""
     cursor.execute('SELECT * FROM mimic_hosp.diagnoses_icd')
     icds = cursor.fetchall()
     cols = list(map(lambda x: x[0], cursor.description))
@@ -27,6 +29,7 @@ def extract_icds(cursor) -> pd.DataFrame:
 
 
 def extract_drgs(cursor) -> pd.DataFrame:
+    """Extract DRG Codes"""
     cursor.execute("SELECT * from mimic_hosp.drgcodes")
     drgs = cursor.fetchall()
     cols = list(map(lambda x: x[0], cursor.description))
@@ -35,6 +38,7 @@ def extract_drgs(cursor) -> pd.DataFrame:
 
 
 def extract_admissions(cursor) -> pd.DataFrame:
+    """Extract admissions"""
     cursor.execute('SELECT * FROM mimic_core.admissions')
     adm = cursor.fetchall()
     cols = list(map(lambda x: x[0], cursor.description))
@@ -43,6 +47,7 @@ def extract_admissions(cursor) -> pd.DataFrame:
 
 
 def extract_patients(cursor) -> pd.DataFrame:
+    """Extract patients"""
     cursor.execute("SELECT * from mimic_core.patients")
     patients = cursor.fetchall()
     cols = list(map(lambda x: x[0], cursor.description))
@@ -51,18 +56,21 @@ def extract_patients(cursor) -> pd.DataFrame:
 
 
 def filter_icd_df(icds: pd.DataFrame, icd_filter_list: List[str]) -> pd.DataFrame:
+    """Filter a dataframe for a list of supplied ICD codes"""
     icd_filter = icds.loc[icds["icd_code"].str.contains(
         '|'.join(icd_filter_list))]
     return icd_filter
 
 
 def filter_drg_df(hf_drg: pd.DataFrame, drg_filter_list: List[str]) -> pd.DataFrame:
+    """Filter a dataframe for a list of supplied DRG codes"""
     hf_filter = hf_drg.loc[hf_drg["description"].isin(
         drg_filter_list)]
     return hf_filter
 
 
-def extract_triage_stays_for_ed_stays(db_cursor, ed_stays):
+def extract_triage_stays_for_ed_stays(db_cursor, ed_stays: List):
+    """Extract triage stays for a list of ed stays"""
     db_cursor.execute(
         'SELECT * FROM mimic_ed.triage where stay_id = any(%s)', [ed_stays])
     triage = db_cursor.fetchall()
@@ -71,7 +79,8 @@ def extract_triage_stays_for_ed_stays(db_cursor, ed_stays):
     return triage
 
 
-def extract_emergency_department_stays_for_admission_ids(db_cursor, hospital_admission_ids):
+def extract_emergency_department_stays_for_admission_ids(db_cursor, hospital_admission_ids: List):
+    """Extract ed stays for a list of hospital admission ids"""
     db_cursor.execute(
         'SELECT * FROM mimic_ed.edstays where hadm_id = any(%s)', [hospital_admission_ids])
     ed_stays = db_cursor.fetchall()
@@ -80,7 +89,8 @@ def extract_emergency_department_stays_for_admission_ids(db_cursor, hospital_adm
     return ed_stays
 
 
-def extract_admissions_for_admission_ids(db_cursor, hospital_admission_ids):
+def extract_admissions_for_admission_ids(db_cursor, hospital_admission_ids: List):
+    """Extract admissions for a list of hospital admission ids"""
     db_cursor.execute(
         'SELECT * FROM mimic_core.admissions where hadm_id = any(%s)', [hospital_admission_ids])
     adm = db_cursor.fetchall()
@@ -90,6 +100,7 @@ def extract_admissions_for_admission_ids(db_cursor, hospital_admission_ids):
 
 
 def get_filename_string(file_name: str, file_ending: str) -> str:
+    """Creates a filename string containing the creation date"""
     date = datetime.now().strftime("%d-%m-%Y-%H_%M_%S")
     return file_name + "_" + date + file_ending
 
