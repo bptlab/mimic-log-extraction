@@ -3,8 +3,8 @@ Provides functionality for extracting a cohort defined by ICD and DRG codes, as 
 """
 import logging
 import pandas as pd
-from .helper import (extract_drgs, extract_icds, extract_patients, filter_icd_df, filter_drg_df, get_filename_string,
-                     extract_icd_descriptions, default_icd_list, default_drg_list)
+from .helper import (extract_drgs, extract_icds, filter_icd_df, filter_drg_df, get_filename_string,
+                     extract_icd_descriptions, extract_patients, default_icd_list, default_drg_list)
 
 logger = logging.getLogger('cli')
 
