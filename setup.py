@@ -9,6 +9,7 @@ requirements = [
     'pandasql==0.7.3',
     'pm4py==2.2.19.1',
     'psycopg2==2.9.3',
+    'psycopg2-binary==2.9.3',
     'scikit-learn==1.0.2',
     'scipy==1.8.0',
     'SQLAlchemy==1.4.31',
