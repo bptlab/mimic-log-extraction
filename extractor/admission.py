@@ -1,9 +1,7 @@
 """Provides functionality to generate admission event logs for a given cohort"""
 import logging
 import pandas as pd
-from .helper import (get_filename_string, extract_admissions_for_admission_ids,
-                     extract_emergency_department_stays_for_admission_ids,
-                     extract_triage_stays_for_ed_stays)
+from .helper import (get_filename_string, extract_admissions_for_admission_ids)
 
 
 logger = logging.getLogger('cli')
