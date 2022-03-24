@@ -31,6 +31,7 @@ setup(
             'typing_extensions==4.1.1',
             'mypy==0.940',
             'mypy-extensions==0.4.3',
+            'pandas-stubs==1.2.0.50',
             'data-science-types==0.2.23',
             'pylint==2.12.2',
             'types-psycopg2==2.9.8 '
