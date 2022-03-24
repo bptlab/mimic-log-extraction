@@ -98,6 +98,16 @@ def extract_admissions_for_admission_ids(db_cursor, hospital_admission_ids: List
     adm = pd.DataFrame(adm, columns=cols)
     return adm
 
+def extract_transfers_for_admission_ids(db_cursor, hospital_admission_ids: List):
+    """Extract admissions for a list of hospital admission ids"""
+    db_cursor.execute(
+        'SELECT * FROM mimic_core.transfers where hadm_id = any(%s)', [hospital_admission_ids])
+    transfers = db_cursor.fetchall()
+    cols = list(map(lambda x: x[0], db_cursor.description))
+    transfers = pd.DataFrame(transfers, columns=cols)
+    return transfers
+
+
 
 def get_filename_string(file_name: str, file_ending: str) -> str:
     """Creates a filename string containing the creation date"""

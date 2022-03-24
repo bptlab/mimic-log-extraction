@@ -11,7 +11,7 @@ from typing import List, Tuple
 from psycopg2 import connect
 
 
-from extractor import (extract_cohort, extract_admission_events)
+from extractor import (extract_cohort, extract_admission_events, extract_transfer_events)
 
 formatter = logging.Formatter(
     fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
@@ -137,3 +137,5 @@ if __name__ == "__main__":
 
     if event_type == "ADMISSION":
         events = extract_admission_events(db_cursor, cohort)
+    elif event_type == "TRANSFER":
+        events = extract_transfer_events(db_cursor, cohort)
