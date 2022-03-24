@@ -40,6 +40,9 @@ parser.add_argument('--age', type=str, help='Patient Age of cohort')
 # Event Type Parameter
 parser.add_argument('--type', type=str, help='Event Type')
 
+# Case Notion Parameter
+parser.add_argument('--notion', type=str, help='Case Notion')
+
 
 def ask_db_settings(input_arguments) -> Tuple[str, str, str, str]:
     """Ask for database connection or read from environment"""
@@ -83,10 +86,19 @@ def ask_cohorts() -> Tuple[List[str], List[str], List[str]]:
     return icd_codes, drg_codes, ages
 
 
-def ask_case_notion():
+def ask_case_notion() -> str:
     """Ask for case notion: Subject_Id or Hospital_Admission_Id"""
     # Todo: None per default
-    return None
+    implemented_case_notions = ['SUBJECT', 'HOSPITAL ADMISSION']
+
+    type_string = args.notion if args.notion is not None else str(
+        input("Choose Case Notion: Subject, Hospital Admission ?\n"))
+
+    if type_string.upper() not in implemented_case_notions:
+        logger.error("The input provided was not in %s",
+                     implemented_case_notions)
+        sys.exit("No valid case notion provided.")
+    return type_string.upper()
 
 
 def ask_case_attributes():
@@ -123,7 +135,7 @@ if __name__ == "__main__":
 
     cohort_icd_codes, cohort_drg_codes, cohort_age = ask_cohorts()
 
-    # case_notion = ask_case_notion()
+    case_notion = ask_case_notion()
 
     # case_attributes = ask_case_attributes()
 
