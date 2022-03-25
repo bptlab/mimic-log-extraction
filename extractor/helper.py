@@ -133,3 +133,6 @@ default_drg_list = ["Heart Failure",
                     "Coronary Bypass w/ Cardiac Cath Or Percutaneous Cardiac Procedure",
                     "Other Circulatory System Diagnoses"
                     ]
+subject_case_attributes = ["gender", "anchor_age", "anchor_year", "anchor_year_group", "dod"]
+hadm_case_attributes = ["admittime","dischtime","deathtime","admission_type","admission_location","discharge_location","insurance","language","marital_status","ethnicity","edregtime","edouttime","hospital_expire_flag"]
+

@@ -11,7 +11,7 @@ from typing import List, Tuple
 from psycopg2 import connect
 
 
-from extractor import (extract_cohort, extract_admission_events, extract_transfer_events)
+from extractor import (extract_cohort, extract_admission_events, extract_transfer_events, subject_case_attributes, hadm_case_attributes)
 
 formatter = logging.Formatter(
     fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
@@ -42,6 +42,10 @@ parser.add_argument('--type', type=str, help='Event Type')
 
 # Case Notion Parameter
 parser.add_argument('--notion', type=str, help='Case Notion')
+
+# Case Attribute Parameter
+parser.add_argument('--case_attributes', type=List[str], help='Case Attributes')
+
 
 
 def ask_db_settings(input_arguments) -> Tuple[str, str, str, str]:
@@ -101,10 +105,23 @@ def ask_case_notion() -> str:
     return type_string.upper()
 
 
-def ask_case_attributes():
+def ask_case_attributes(case_notion) -> List[str]:
     """Ask for case attributes"""
     # Todo: None per default
-    return None
+    logger.info("Determining case attributes...")
+    logger.info("The following case notion was selected: %s" + case_notion)
+    logger.info("Available case attributes:")
+    if (case_notion == "SUBJECT"):
+        logger.info('[%s]' % ', '.join(map(str, subject_case_attributes)))
+    elif (case_notion == "HOSPITAL ADMISSION"):
+        logger.info('[%s]' % ', '.join(map(str, hadm_case_attributes)))
+    case_attribute_string = args.case_attributes if args.case_attributes is not None else str(
+        input("Enter case attributes seperated by comma (Press enter to choose all):\n"))
+    case_attributes = case_attribute_string.split(',')
+    case_attributes = None if case_attributes == [''] else case_attributes
+
+    
+    return case_attributes
 
 
 def ask_event_type():
@@ -137,7 +154,7 @@ if __name__ == "__main__":
 
     case_notion = ask_case_notion()
 
-    # case_attributes = ask_case_attributes()
+    case_attributes = ask_case_attributes(case_notion)
 
     event_type = ask_event_type()
 
