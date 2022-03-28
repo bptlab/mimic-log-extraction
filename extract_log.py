@@ -11,7 +11,8 @@ from typing import List, Tuple
 from psycopg2 import connect
 
 
-from extractor import (extract_cohort, extract_admission_events, extract_transfer_events, subject_case_attributes, hadm_case_attributes)
+from extractor import (extract_cohort, extract_admission_events, extract_transfer_events, 
+extract_case_attributes, subject_case_attributes, hadm_case_attributes)
 
 formatter = logging.Formatter(
     fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
@@ -44,7 +45,7 @@ parser.add_argument('--type', type=str, help='Event Type')
 parser.add_argument('--notion', type=str, help='Case Notion')
 
 # Case Attribute Parameter
-parser.add_argument('--case_attributes', type=List[str], help='Case Attributes')
+parser.add_argument('--case_attribute_list', type=List[str], help='Case Attributes')
 
 
 
@@ -111,17 +112,20 @@ def ask_case_attributes(case_notion) -> List[str]:
     logger.info("Determining case attributes...")
     logger.info("The following case notion was selected: %s" + case_notion)
     logger.info("Available case attributes:")
-    if (case_notion == "SUBJECT"):
+    if case_notion == "SUBJECT":
         logger.info('[%s]' % ', '.join(map(str, subject_case_attributes)))
-    elif (case_notion == "HOSPITAL ADMISSION"):
+    elif case_notion == "HOSPITAL ADMISSION":
         logger.info('[%s]' % ', '.join(map(str, hadm_case_attributes)))
-    case_attribute_string = args.case_attributes if args.case_attributes is not None else str(
+    type_string = args.case_attribute_list if args.case_attribute_list is not None else str(
         input("Enter case attributes seperated by comma (Press enter to choose all):\n"))
-    case_attributes = case_attribute_string.split(',')
-    case_attributes = None if case_attributes == [''] else case_attributes
-
-    
-    return case_attributes
+    type_list = type_string.split(',')
+    if type_list == ['']:
+        if case_notion == "SUBJECT":
+            type_list = subject_case_attributes
+        elif case_notion == "HOSPITAL ADMISSION":
+            type_list = hadm_case_attributes
+ 
+    return type_list
 
 
 def ask_event_type():
@@ -154,7 +158,7 @@ if __name__ == "__main__":
 
     case_notion = ask_case_notion()
 
-    case_attributes = ask_case_attributes(case_notion)
+    case_attribute_list = ask_case_attributes(case_notion)
 
     event_type = ask_event_type()
 
@@ -163,6 +167,8 @@ if __name__ == "__main__":
     # build cohort
     cohort = extract_cohort(db_cursor, cohort_icd_codes,
                             cohort_drg_codes, cohort_age)
+
+    case_attributes = extract_case_attributes(db_cursor, cohort, case_notion, case_attribute_list)
 
     if event_type == "ADMISSION":
         events = extract_admission_events(db_cursor, cohort)
