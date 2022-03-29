@@ -99,7 +99,7 @@ def extract_admissions_for_admission_ids(db_cursor, hospital_admission_ids: List
     return adm
 
 def extract_transfers_for_admission_ids(db_cursor, hospital_admission_ids: List):
-    """Extract admissions for a list of hospital admission ids"""
+    """Extract transfers for a list of hospital admission ids"""
     db_cursor.execute(
         'SELECT * FROM mimic_core.transfers where hadm_id = any(%s)', [hospital_admission_ids])
     transfers = db_cursor.fetchall()
@@ -107,6 +107,32 @@ def extract_transfers_for_admission_ids(db_cursor, hospital_admission_ids: List)
     transfers = pd.DataFrame(transfers, columns=cols)
     return transfers
 
+def extract_poe_for_admission_ids(db_cursor, hospital_admission_ids: List):
+    """Extract provider order entries for a list of hospital admission ids"""
+    db_cursor.execute(
+        'SELECT * FROM mimic_hosp.poe where hadm_id = any(%s)', [hospital_admission_ids])
+    poe = db_cursor.fetchall()
+    cols = list(map(lambda x: x[0], db_cursor.description))
+    poe = pd.DataFrame(poe, columns=cols)
+    db_cursor.execute(
+        'SELECT * FROM mimic_hosp.poe_detail')
+    poe_d = db_cursor.fetchall()
+    cols = list(map(lambda x: x[0], db_cursor.description))
+    poe_d = pd.DataFrame(poe_d, columns=cols)
+    poe_d = poe_d.drop_duplicates("poe_id")[["poe_id", "field_name", "field_value"]]
+    poe = poe.merge(poe_d, how="left", on="poe_id")
+    return poe
+
+def extract_table_for_admission_ids(db_cursor, hospital_admission_ids: List,
+                                    mimic_module: str, table_name: str):
+    """Extract any table in MIMIC for a list of hospital admission ids"""
+    db_cursor.execute(
+        'SELECT * FROM ' + mimic_module + '.' + table_name +
+        ' where hadm_id = any(%s)', [hospital_admission_ids])
+    table = db_cursor.fetchall()
+    cols = list(map(lambda x: x[0], db_cursor.description))
+    table = pd.DataFrame(table, columns=cols)
+    return table 
 
 
 def get_filename_string(file_name: str, file_ending: str) -> str:

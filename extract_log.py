@@ -11,8 +11,8 @@ from typing import List, Tuple
 from psycopg2 import connect
 
 
-from extractor import (extract_cohort, extract_admission_events, extract_transfer_events, 
-extract_case_attributes, subject_case_attributes, hadm_case_attributes)
+from extractor import (extract_cohort, extract_admission_events, extract_transfer_events,
+extract_case_attributes, subject_case_attributes, hadm_case_attributes, extract_poe_events)
 
 formatter = logging.Formatter(
     fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
@@ -130,10 +130,10 @@ def ask_case_attributes(case_notion) -> List[str]:
 
 def ask_event_type():
     """Ask for event types: Admission, Transfer, ...?"""
-    implemented_event_types = ['ADMISSION', 'TRANSFER']
+    implemented_event_types = ['ADMISSION', 'TRANSFER', 'POE']
 
     type_string = args.type if args.type is not None else str(
-        input("Choose Event Type: Admission, Transfer, ?\n"))
+        input("Choose Event Type: Admission, Transfer, POE, ?\n"))
 
     if type_string.upper() not in implemented_event_types:
         logger.error("The input provided was not in %s",
@@ -168,9 +168,21 @@ if __name__ == "__main__":
     cohort = extract_cohort(db_cursor, cohort_icd_codes,
                             cohort_drg_codes, cohort_age)
 
+    #FOR TESTING PURPOSE, SHRINKS THE COHORT TO 50 CASES
+    cohort = cohort[:50]
+
     case_attributes = extract_case_attributes(db_cursor, cohort, case_notion, case_attribute_list)
 
     if event_type == "ADMISSION":
         events = extract_admission_events(db_cursor, cohort)
     elif event_type == "TRANSFER":
         events = extract_transfer_events(db_cursor, cohort)
+    elif event_type == "POE":
+        include_medications = input("""POE links to medication tables 
+        (pharmacy, emar, prescriptions).\n Shall the medication events be enhanced by the 
+        concrete medications prescribed? (Y/N)""")
+        if include_medications == "Y":
+            events = extract_poe_events(db_cursor, cohort, True)
+        else:
+            events = extract_poe_events(db_cursor, cohort, False)
+            
