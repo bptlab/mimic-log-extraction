@@ -1,7 +1,8 @@
 """Provides functionality to generate POE event logs for a given cohort"""
 import logging
 import pandas as pd
-from .helper import (get_filename_string, extract_poe_for_admission_ids, extract_table_for_admission_ids)
+from .helper import (get_filename_string, extract_poe_for_admission_ids, 
+                    extract_table_for_admission_ids)
 
 
 logger = logging.getLogger('cli')
@@ -32,13 +33,13 @@ def extract_poe_events(db_cursor, cohort, include_medications) -> pd.DataFrame:
         medications.drop_duplicates("poe_id", inplace=True)
         poe_with_medications = poe.merge(medications, on=["poe_id", "subject_id", "hadm_id"],
                                         how="left")
-        poe_with_medications.loc[poe_with_medications["order_type"] == "Medications", 
+        poe_with_medications.loc[poe_with_medications["order_type"] == "Medications",
                                 "order_subtype"] = poe_with_medications["medication"]
         filename = get_filename_string("poe_with_medications_log", ".csv")
         poe_with_medications.to_csv("output/" + filename)
         logger.info("Done extracting POE events!")
         return poe_with_medications
-    
+
     filename = get_filename_string("poe_log", ".csv")
     poe.to_csv("output/" + filename)
     logger.info("Done extracting POE events!")

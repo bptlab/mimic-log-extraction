@@ -132,7 +132,7 @@ def extract_table_for_admission_ids(db_cursor, hospital_admission_ids: List,
     table = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
     table = pd.DataFrame(table, columns=cols)
-    return table 
+    return table
 
 
 def get_filename_string(file_name: str, file_ending: str) -> str:
