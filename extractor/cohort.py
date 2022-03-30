@@ -45,12 +45,12 @@ def extract_cohort(db_cursor, icd_codes, icd_version, icd_seq_num,
 
     cohort = extract_admissions(db_cursor)
     cohort = cohort[["subject_id", "hadm_id", "admittime"]]
-    cohort["admityear"] = cohort["admittime"].dt.year
+    cohort["admityear"] = cohort["admittime"].dt.year # type: ignore
 
     patients = extract_patients(db_cursor)
     patients = patients[["subject_id", "anchor_age", "anchor_year"]]
     cohort = cohort.merge(patients, on="subject_id", how="inner")
-    cohort["age"] = cohort["anchor_age"] + cohort["admityear"] - cohort["anchor_year"]
+    cohort["age"] = cohort["anchor_age"] + cohort["admityear"] - cohort["anchor_year"] # type: ignore
     cohort.drop(["admittime", "admityear", "anchor_age", "anchor_year"], axis=1, inplace=True)
 
     if ages is None or ages == ['']:
