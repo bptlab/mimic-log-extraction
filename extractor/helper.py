@@ -54,6 +54,17 @@ def extract_patients(cursor) -> pd.DataFrame:
     patients = pd.DataFrame(patients, columns=cols)
     return patients
 
+def filter_age_ranges(cohort: pd.DataFrame, ages: List[str]) -> pd.DataFrame:
+    """Filter a dataframe for a list of age ranges"""
+    condition_list = []
+    for age_interval in ages:
+        age_min = age_interval.split(":", 1)[0]
+        age_max = age_interval.split(":", 1)[1]
+        condition_list.append('(age >= ' + age_min + ' and age <= ' + age_max + ')')
+    condition = 'or'.join(condition_list)
+    cohort = cohort.query(condition)
+    return cohort
+
 
 def filter_icd_df(icds: pd.DataFrame, icd_filter_list: List[str], icd_version: int) -> pd.DataFrame:
     """Filter a dataframe for a list of supplied ICD codes"""

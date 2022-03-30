@@ -77,11 +77,11 @@ def ask_cohorts() -> Tuple[List[str], int, List[str], str, List[str]]:
     """Ask for patient cohort filters"""
     logger.info("Determining patient cohort...")
     icd_string = args.icd if args.icd is not None else str(
-        input("Enter ICD code(s) seperated by comma:\n"))
+        input("Enter ICD code(s) seperated by comma (Typing ALL selects all):\n"))
     icd_codes = icd_string.split(',')
     icd_codes = None if icd_codes == [''] else icd_codes
 
-    if icd_codes is not None and "IGNORE" in icd_codes:
+    if icd_codes is not None and "ALL" in icd_codes:
         ask_for_icd_detail = False
         icd_version = None
         icd_seq_num = None
@@ -95,11 +95,11 @@ def ask_cohorts() -> Tuple[List[str], int, List[str], str, List[str]]:
         input("Enter considered ranking threshold of diagnosis (1 is the highest priority):\n"))
 
     drg_string = args.drg if args.drg is not None else str(
-        input("Enter DRG code(s) seperated by comma:\n"))
+        input("Enter DRG code(s) seperated by comma (Typing ALL selects all):\n"))
     drg_codes = drg_string.split(',')
     drg_codes = None if drg_codes == [''] else drg_codes
 
-    if drg_codes is not None and "IGNORE" in drg_codes:
+    if drg_codes is not None and "ALL" in drg_codes:
         ask_for_drg_detail = False
         drg_type = None
     else:
@@ -111,7 +111,7 @@ def ask_cohorts() -> Tuple[List[str], int, List[str], str, List[str]]:
         drg_type = None if drg_type == [''] else drg_type
 
     age_string = args.age if args.age is not None else str(
-        input("Enter Patient Age(s) seperated by comma:\n"))
+        input("Enter Patient Age ranges seperated by comma, e.g. 0:20,50:90:\n"))
     ages = age_string.split(',')
     ages = None if ages == [''] else ages
 
