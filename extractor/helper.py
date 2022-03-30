@@ -55,16 +55,20 @@ def extract_patients(cursor) -> pd.DataFrame:
     return patients
 
 
-def filter_icd_df(icds: pd.DataFrame, icd_filter_list: List[str]) -> pd.DataFrame:
+def filter_icd_df(icds: pd.DataFrame, icd_filter_list: List[str], icd_version: int) -> pd.DataFrame:
     """Filter a dataframe for a list of supplied ICD codes"""
-    icd_filter = icds.loc[icds["icd_code"].str.contains(
+    if icd_version != 0:
+        icd_filter = icds.loc[icds["icd_version"] == icd_version]
+    else:
+        icd_filter = icds
+    icd_filter = icd_filter.loc[icd_filter["icd_code"].str.contains(
         '|'.join(icd_filter_list))]
     return icd_filter
 
 
 def filter_drg_df(hf_drg: pd.DataFrame, drg_filter_list: List[str]) -> pd.DataFrame:
     """Filter a dataframe for a list of supplied DRG codes"""
-    hf_filter = hf_drg.loc[hf_drg["description"].isin(
+    hf_filter = hf_drg.loc[hf_drg["drg_code"].isin(
         drg_filter_list)]
     return hf_filter
 
@@ -147,17 +151,7 @@ default_icd_list = ["42821", "42823", "42831",
                     "I5033", "I5041", "I5042",
                     "I5043", "I5811", "I5813"]
 
-default_drg_list = ["Heart Failure",
-                    "Cardiac Catheterization w/ Circ Disord Exc Ischemic Heart Disease",
-                    "Percutaneous Cardiovascular Procedures w/o AMI",
-                    "Cardiac Arrhythmia & Conduction Disorders",
-                    "Acute Myocardial Infarction",
-                    "Percutaneous Cardiovascular Procedures w/ AMI",
-                    "Cardiac Catheterization for Ischemic Heart Disease",
-                    "Cardiac Defibrillator & Heart Assist Anomaly",
-                    "Cardiac Valve Procedures w/ Cardiac Catheterization",
-                    "Coronary Bypass w/ Cardiac Cath Or Percutaneous Cardiac Procedure",
-                    "Other Circulatory System Diagnoses"
+default_drg_list = ["194", "190", "201", "207"
                     ]
 subject_case_attributes = ["gender", "anchor_age", "anchor_year", "anchor_year_group", "dod"]
 hadm_case_attributes = ["admittime","dischtime","deathtime","admission_type","admission_location",

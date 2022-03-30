@@ -35,7 +35,9 @@ parser.add_argument('--db_pw', type=str, help='Database Password')
 
 # Patient Cohort Parameters
 parser.add_argument('--icd', type=str, help='ICD code(s) of cohort')
+parser.add_argument('--icd_version', type=int, help='ICD version')
 parser.add_argument('--drg', type=str, help='DRG code(s) of cohort')
+parser.add_argument('--drg_type', type=str, help='DRG type (HCFA, APR)')
 parser.add_argument('--age', type=str, help='Patient Age of cohort')
 
 # Event Type Parameter
@@ -70,7 +72,7 @@ def create_db_connection(name, host, user, password):
     return con
 
 
-def ask_cohorts() -> Tuple[List[str], List[str], List[str]]:
+def ask_cohorts() -> Tuple[List[str], int, List[str], str, List[str]]:
     """Ask for patient cohort filters"""
     logger.info("Determining patient cohort...")
     icd_string = args.icd if args.icd is not None else str(
@@ -78,17 +80,24 @@ def ask_cohorts() -> Tuple[List[str], List[str], List[str]]:
     icd_codes = icd_string.split(',')
     icd_codes = None if icd_codes == [''] else icd_codes
 
+    icd_version = args.icd_version if args.icd_version is not None else int(
+    input("Enter ICD version (9, 10, 0 for both):\n"))
+
     drg_string = args.drg if args.drg is not None else str(
         input("Enter DRG code(s) seperated by comma:\n"))
     drg_codes = drg_string.split(',')
     drg_codes = None if drg_codes == [''] else drg_codes
+
+    drg_type = args.drg_type if args.drg_type is not None else str(
+    input("Enter DRG ontology (HCFA, APR):\n"))
+    drg_type = None if drg_type == [''] else drg_type
 
     age_string = args.age if args.age is not None else str(
         input("Enter Patient Age(s) seperated by comma:\n"))
     ages = age_string.split(',')
     ages = None if ages == [''] else ages
 
-    return icd_codes, drg_codes, ages
+    return icd_codes, icd_version, drg_codes, drg_type, ages
 
 
 def ask_case_notion() -> str:
@@ -124,7 +133,7 @@ def ask_case_attributes(case_notion) -> List[str]:
             type_list = subject_case_attributes
         elif case_notion == "HOSPITAL ADMISSION":
             type_list = hadm_case_attributes
- 
+
     return type_list
 
 
@@ -154,7 +163,8 @@ if __name__ == "__main__":
     db_connection = create_db_connection(db_name, db_host, db_user, db_pw)
     db_cursor = db_connection.cursor()
 
-    cohort_icd_codes, cohort_drg_codes, cohort_age = ask_cohorts()
+    cohort_icd_codes, cohort_icd_version, cohort_drg_codes, \
+    cohort_drg_type, cohort_age = ask_cohorts()
 
     case_notion = ask_case_notion()
 
@@ -165,9 +175,8 @@ if __name__ == "__main__":
     # event_attributes = ask_event_attributes()
 
     # build cohort
-    cohort = extract_cohort(db_cursor, cohort_icd_codes,
-                            cohort_drg_codes, cohort_age)
-
+    cohort = extract_cohort(db_cursor, cohort_icd_codes, cohort_icd_version,
+                            cohort_drg_codes, cohort_drg_type, cohort_age)
     #FOR TESTING PURPOSE, SHRINKS THE COHORT TO 50 CASES
     cohort = cohort[:50]
 
@@ -178,11 +187,10 @@ if __name__ == "__main__":
     elif event_type == "TRANSFER":
         events = extract_transfer_events(db_cursor, cohort)
     elif event_type == "POE":
-        include_medications = input("""POE links to medication tables 
+        include_medications = input("""POE links to medication tables
         (pharmacy, emar, prescriptions).\n Shall the medication events be enhanced by the 
         concrete medications prescribed? (Y/N)""")
         if include_medications == "Y":
             events = extract_poe_events(db_cursor, cohort, True)
         else:
             events = extract_poe_events(db_cursor, cohort, False)
-            
