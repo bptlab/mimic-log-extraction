@@ -83,6 +83,8 @@ def ask_cohorts() -> Tuple[List[str], int, List[str], str, List[str]]:
 
     if icd_codes is not None and "IGNORE" in icd_codes:
         ask_for_icd_detail = False
+        icd_version = None
+        icd_seq_num = None
     else:
         ask_for_icd_detail = True
 
@@ -99,6 +101,7 @@ def ask_cohorts() -> Tuple[List[str], int, List[str], str, List[str]]:
 
     if drg_codes is not None and "IGNORE" in drg_codes:
         ask_for_drg_detail = False
+        drg_type = None
     else:
         ask_for_drg_detail = True
 
