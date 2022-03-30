@@ -9,7 +9,8 @@ from .helper import (extract_drgs, extract_icds, filter_icd_df, filter_drg_df, g
 logger = logging.getLogger('cli')
 
 
-def extract_cohort(db_cursor, icd_codes, icd_version, drg_codes, drg_type, ages) -> pd.DataFrame:
+def extract_cohort(db_cursor, icd_codes, icd_version, icd_seq_num,
+                    drg_codes, drg_type, ages) -> pd.DataFrame:
     """
     Selects a cohort of patient filtered by age,
     as well as ICD and DRG codes.
@@ -58,7 +59,7 @@ def extract_cohort(db_cursor, icd_codes, icd_version, drg_codes, drg_type, ages)
     if "IGNORE" not in icd_filter_list:
         icd_cohort = filter_icd_df(icds=icds, icd_filter_list=icd_filter_list,
                                     icd_version=icd_version)
-        icd_cohort = icd_cohort.loc[icd_cohort["seq_num"] < 4]
+        icd_cohort = icd_cohort.loc[icd_cohort["seq_num"] <= icd_seq_num]
         icd_cohort = icd_cohort.reset_index().drop("index", axis=1)
         icd_cohort["icd_code"] = icd_cohort["icd_code"].str.replace(" ", "") # type: ignore
         icd_cohort = icd_cohort[["hadm_id", "icd_code"]].groupby("hadm_id").agg(list).reset_index()

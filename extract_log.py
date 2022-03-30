@@ -36,6 +36,7 @@ parser.add_argument('--db_pw', type=str, help='Database Password')
 # Patient Cohort Parameters
 parser.add_argument('--icd', type=str, help='ICD code(s) of cohort')
 parser.add_argument('--icd_version', type=int, help='ICD version')
+parser.add_argument('--icd_sequence_number', type=int, help='Ranking threshold of diagnosis')
 parser.add_argument('--drg', type=str, help='DRG code(s) of cohort')
 parser.add_argument('--drg_type', type=str, help='DRG type (HCFA, APR)')
 parser.add_argument('--age', type=str, help='Patient Age of cohort')
@@ -80,24 +81,38 @@ def ask_cohorts() -> Tuple[List[str], int, List[str], str, List[str]]:
     icd_codes = icd_string.split(',')
     icd_codes = None if icd_codes == [''] else icd_codes
 
-    icd_version = args.icd_version if args.icd_version is not None else int(
-    input("Enter ICD version (9, 10, 0 for both):\n"))
+    if icd_codes is not None and "IGNORE" in icd_codes:
+        ask_for_icd_detail = False
+    else:
+        ask_for_icd_detail = True
+
+    if ask_for_icd_detail is True:
+        icd_version = args.icd_version if args.icd_version is not None else int(
+        input("Enter ICD version (9, 10, 0 for both):\n"))
+        icd_seq_num = args.icd_sequence_number if args.icd_sequence_number is not None else int(
+        input("Enter considered ranking threshold of diagnosis (1 is the highest priority):\n"))
 
     drg_string = args.drg if args.drg is not None else str(
         input("Enter DRG code(s) seperated by comma:\n"))
     drg_codes = drg_string.split(',')
     drg_codes = None if drg_codes == [''] else drg_codes
 
-    drg_type = args.drg_type if args.drg_type is not None else str(
-    input("Enter DRG ontology (HCFA, APR):\n"))
-    drg_type = None if drg_type == [''] else drg_type
+    if drg_codes is not None and "IGNORE" in drg_codes:
+        ask_for_drg_detail = False
+    else:
+        ask_for_drg_detail = True
+
+    if ask_for_drg_detail is True:
+        drg_type = args.drg_type if args.drg_type is not None else str(
+        input("Enter DRG ontology (HCFA, APR):\n"))
+        drg_type = None if drg_type == [''] else drg_type
 
     age_string = args.age if args.age is not None else str(
         input("Enter Patient Age(s) seperated by comma:\n"))
     ages = age_string.split(',')
     ages = None if ages == [''] else ages
 
-    return icd_codes, icd_version, drg_codes, drg_type, ages
+    return icd_codes, icd_version, icd_seq_num, drg_codes, drg_type, ages
 
 
 def ask_case_notion() -> str:
@@ -119,7 +134,7 @@ def ask_case_attributes(case_notion) -> List[str]:
     """Ask for case attributes"""
     # Todo: None per default
     logger.info("Determining case attributes...")
-    logger.info("The following case notion was selected: %s" + case_notion)
+    logger.info("The following case notion was selected: " + case_notion)
     logger.info("Available case attributes:")
     if case_notion == "SUBJECT":
         logger.info('[%s]' % ', '.join(map(str, subject_case_attributes)))
@@ -163,7 +178,7 @@ if __name__ == "__main__":
     db_connection = create_db_connection(db_name, db_host, db_user, db_pw)
     db_cursor = db_connection.cursor()
 
-    cohort_icd_codes, cohort_icd_version, cohort_drg_codes, \
+    cohort_icd_codes, cohort_icd_version, cohort_icd_seq_num, cohort_drg_codes, \
     cohort_drg_type, cohort_age = ask_cohorts()
 
     case_notion = ask_case_notion()
@@ -175,7 +190,7 @@ if __name__ == "__main__":
     # event_attributes = ask_event_attributes()
 
     # build cohort
-    cohort = extract_cohort(db_cursor, cohort_icd_codes, cohort_icd_version,
+    cohort = extract_cohort(db_cursor, cohort_icd_codes, cohort_icd_version, cohort_icd_seq_num,
                             cohort_drg_codes, cohort_drg_type, cohort_age)
     #FOR TESTING PURPOSE, SHRINKS THE COHORT TO 50 CASES
     cohort = cohort[:50]
