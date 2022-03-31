@@ -11,8 +11,9 @@ from typing import List, Tuple
 from psycopg2 import connect
 
 
-from extractor import (extract_cohort, extract_admission_events, extract_transfer_events,
-extract_case_attributes, subject_case_attributes, hadm_case_attributes, extract_poe_events)
+from extractor import (extract_cohort, extract_cohort_for_ids, extract_admission_events,
+                    extract_transfer_events, extract_case_attributes,
+                    subject_case_attributes, hadm_case_attributes, extract_poe_events)
 
 formatter = logging.Formatter(
     fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
@@ -34,6 +35,8 @@ parser.add_argument('--db_user', type=str, help='Database User')
 parser.add_argument('--db_pw', type=str, help='Database Password')
 
 # Patient Cohort Parameters
+parser.add_argument('--subject_ids', type=str, help='Subject IDs of cohort')
+parser.add_argument('--hadm_ids', type=str, help='Hospital Admission IDs of cohort')
 parser.add_argument('--icd', type=str, help='ICD code(s) of cohort')
 parser.add_argument('--icd_version', type=int, help='ICD version')
 parser.add_argument('--icd_sequence_number', type=int, help='Ranking threshold of diagnosis')
@@ -48,7 +51,8 @@ parser.add_argument('--type', type=str, help='Event Type')
 parser.add_argument('--notion', type=str, help='Case Notion')
 
 # Case Attribute Parameter
-parser.add_argument('--case_attribute_list', type=List[str], help='Case Attributes')
+parser.add_argument('--case_attribute_list', type=str, help='Case Attributes')
+
 
 
 
@@ -73,9 +77,10 @@ def create_db_connection(name, host, user, password):
     return con
 
 
-def ask_cohorts() -> Tuple[List[str], int, List[str], str, List[str]]:
+def ask_cohorts() -> Tuple[List[str], int, int, List[str], str, List[str]]:
     """Ask for patient cohort filters"""
     logger.info("Determining patient cohort...")
+
     icd_string = args.icd if args.icd is not None else str(
         input("Enter ICD code(s) seperated by comma (Typing ALL selects all):\n"))
     icd_codes = icd_string.split(',')
@@ -181,8 +186,9 @@ if __name__ == "__main__":
     db_connection = create_db_connection(db_name, db_host, db_user, db_pw)
     db_cursor = db_connection.cursor()
 
-    cohort_icd_codes, cohort_icd_version, cohort_icd_seq_num, cohort_drg_codes, \
-    cohort_drg_type, cohort_age = ask_cohorts()
+    if args.subject_ids is None and args.hadm_ids is None:
+        cohort_icd_codes, cohort_icd_version, cohort_icd_seq_num, cohort_drg_codes, \
+        cohort_drg_type, cohort_age = ask_cohorts()
 
     case_notion = ask_case_notion()
 
@@ -193,8 +199,11 @@ if __name__ == "__main__":
     # event_attributes = ask_event_attributes()
 
     # build cohort
-    cohort = extract_cohort(db_cursor, cohort_icd_codes, cohort_icd_version, cohort_icd_seq_num,
-                            cohort_drg_codes, cohort_drg_type, cohort_age)
+    if args.subject_ids is None and args.hadm_ids is None:
+        cohort = extract_cohort(db_cursor, cohort_icd_codes, cohort_icd_version, cohort_icd_seq_num,
+                                cohort_drg_codes, cohort_drg_type, cohort_age)
+    else:
+        cohort = extract_cohort_for_ids(db_cursor, args.subject_ids, args.hadm_ids)
     #FOR TESTING PURPOSE, SHRINKS THE COHORT TO 50 CASES
     cohort = cohort[:50]
 
