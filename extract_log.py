@@ -225,7 +225,7 @@ if __name__ == "__main__":
         cohort = extract_cohort_for_ids(
             db_cursor, args.subject_ids, args.hadm_ids)
     # FOR TESTING PURPOSE, SHRINKS THE COHORT TO 50 CASES
-    cohort = cohort[:50]
+    cohort = cohort[:50]  # type: ignore
 
     case_attributes = extract_case_attributes(
         db_cursor, cohort, determined_case_notion, case_attribute_list)

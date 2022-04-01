@@ -36,7 +36,8 @@ setup(
             'pandas-stubs==1.2.0.50',
             'data-science-types==0.2.23',
             'pylint==2.12.2',
-            'types-psycopg2==2.9.8 '
+            'types-psycopg2==2.9.8',
+            'types-PyYAML==6.0.5'
         ]
     },
     include_package_data=True,
