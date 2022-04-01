@@ -32,4 +32,4 @@ lint:
   stage: test
   script:
     - cd $CI_PROJECT_DIR
-    - $CI_PROJECT_DIR/venv/bin/pylint pylint *.py **/*.py --rcfile .pylintrc
+    - $CI_PROJECT_DIR/venv/bin/pylint extract_log.py extractor --rcfile .pylintrc
