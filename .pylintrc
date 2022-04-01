@@ -15,3 +15,6 @@ init-import=yes
 
 [REFACTORING]
 max-nested-blocks=6
+
+[MASTER]
+ignore=setup.py
