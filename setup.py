@@ -13,7 +13,8 @@ requirements = [
     'scikit-learn==1.0.2',
     'scipy==1.8.0',
     'SQLAlchemy==1.4.31',
-    'python-dotenv==0.19.2'
+    'python-dotenv==0.19.2',
+    'pyyaml==6.0'
 ]
 
 

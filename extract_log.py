@@ -6,8 +6,9 @@ Provides the main CLI functionality for extracting configurable event logs out o
 import argparse
 import logging
 import sys
+import yaml
 
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 from psycopg2 import connect
 
 
@@ -55,20 +56,30 @@ parser.add_argument('--notion', type=str, help='Case Notion')
 # Case Attribute Parameter
 parser.add_argument('--case_attribute_list', type=str, help='Case Attributes')
 
+# Config File Argument
+parser.add_argument('--config', type=str,
+                    help='Config file for providing all options via file')
 
 
-
-def ask_db_settings(input_arguments) -> Tuple[str, str, str, str]:
-    """Ask for database connection or read from environment"""
+def parse_or_ask_db_settings(input_arguments, config_object: dict) -> Tuple[str, str, str, str]:
+    """Parse database config or use flags/ask for input"""
     logger.info("Determining and establishing database connection...")
-    input_db_name = input_arguments.db_name if input_arguments.db_name is not None else str(
-        input("Enter Database Name:\n"))
-    input_db_host = input_arguments.db_host if input_arguments.db_host is not None else str(
-        input("Enter Database Host:\n"))
-    input_db_user = input_arguments.db_user if input_arguments.db_user is not None else str(
-        input("Enter Database User:\n"))
-    input_db_password = input_arguments.db_pw if input_arguments.db_pw is not None else str(
-        input("Enter Database Password:\n"))
+    if config_object is not None and config_object["db"] is not None:
+        db_config = config_object["db"]
+        # todo: check for missing config keys
+        input_db_name = db_config["name"]
+        input_db_host = db_config["host"]
+        input_db_user = db_config["user"]
+        input_db_password = db_config["pw"]
+    else:
+        input_db_name = input_arguments.db_name if input_arguments.db_name is not None else str(
+            input("Enter Database Name:\n"))
+        input_db_host = input_arguments.db_host if input_arguments.db_host is not None else str(
+            input("Enter Database Host:\n"))
+        input_db_user = input_arguments.db_user if input_arguments.db_user is not None else str(
+            input("Enter Database User:\n"))
+        input_db_password = input_arguments.db_pw if input_arguments.db_pw is not None else str(
+            input("Enter Database Password:\n"))
     return input_db_name, input_db_host, input_db_user, input_db_password
 
 
@@ -143,7 +154,7 @@ def ask_case_notion() -> str:
 def ask_case_attributes(case_notion) -> List[str]:
     """Ask for case attributes"""
     logger.info("Determining case attributes...")
-    logger.info("The following case notion was selected: " + case_notion)
+    logger.info("The following case notion was selected: %s", case_notion)
     logger.info("Available case attributes:")
     if case_notion == "SUBJECT":
         logger.info('[%s]' % ', '.join(map(str, subject_case_attributes)))
@@ -183,7 +194,14 @@ def ask_event_attributes():
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    db_name, db_host, db_user, db_pw = ask_db_settings(args)
+
+    config: Optional[dict] = None
+    if args.config is not None:
+        with open(args.config, 'r', encoding='utf-8') as file:
+            config: dict = yaml.safe_load(file)
+
+    db_name, db_host, db_user, db_pw = parse_or_ask_db_settings(
+        args, config_object=config)
     db_connection = create_db_connection(db_name, db_host, db_user, db_pw)
     db_cursor = db_connection.cursor()
 
