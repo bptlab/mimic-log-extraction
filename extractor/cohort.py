@@ -104,8 +104,8 @@ def extract_cohort(db_cursor, icd_codes, icd_version, icd_seq_num,
                                    icd_version=icd_version)
         icd_cohort = icd_cohort.loc[icd_cohort["seq_num"] <= icd_seq_num]
         icd_cohort = icd_cohort.reset_index().drop("index", axis=1)
-        icd_cohort["icd_code"] = icd_cohort["icd_code"].str.replace(
-            " ", "")  # type: ignore
+        icd_cohort["icd_code"] = icd_cohort["icd_code"].str.replace(  # type: ignore
+            " ", "")
         icd_cohort = icd_cohort[["hadm_id", "icd_code"]].groupby(
             "hadm_id").agg(list).reset_index()
         cohort = cohort.loc[cohort["hadm_id"].isin(
