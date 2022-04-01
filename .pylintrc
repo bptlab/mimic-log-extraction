@@ -6,6 +6,8 @@ disable=too-many-arguments,
   too-many-instance-attributes,
   too-many-statements,
   duplicate-code,
+  logging-not-lazy,
+  consider-using-f-string,
   fixme
 
 [FORMAT]
