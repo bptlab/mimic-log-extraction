@@ -64,3 +64,14 @@ pip install -e .[dev]
 ```
 
 If you're using `zsh`, escape the square brackets: `pip install -e .\[dev\]`
+
+## development
+
+After installing all required dev dependencies, make sure to regularly call
+
+```bash
+pylint extract_log.py extractor --rcfile .pylintrc
+mypy --config-file mypy.ini .
+```
+
+to ensure linted and typechecked code.
