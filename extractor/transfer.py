@@ -22,6 +22,8 @@ def extract_transfer_events(db_cursor, cohort) -> pd.DataFrame:
 
     transfers = transfers.sort_values(["hadm_id", "intime"])
 
+    transfers = transfers.reset_index().drop("index", axis=1)
+
     filename = get_filename_string("transfer_log", ".csv")
 
     transfers.to_csv("output/" + filename)

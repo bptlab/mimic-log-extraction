@@ -38,6 +38,7 @@ def extract_admission_events(db_cursor, cohort) -> pd.DataFrame:
                 i = i + 1
     log = pd.DataFrame.from_dict(event_dict, "index")  # type: ignore
     log = log.sort_values("timestamp")
+    log = log.reset_index().drop("index", axis=1)
 
     filename = get_filename_string("admission_log", ".csv")
     log.to_csv("output/" + filename)
