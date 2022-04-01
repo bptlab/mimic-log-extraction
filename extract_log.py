@@ -6,9 +6,9 @@ Provides the main CLI functionality for extracting configurable event logs out o
 import argparse
 import logging
 import sys
-import yaml
-
 from typing import List, Optional, Tuple
+
+import yaml
 from psycopg2 import connect
 
 
@@ -61,7 +61,8 @@ parser.add_argument('--config', type=str,
                     help='Config file for providing all options via file')
 
 
-def parse_or_ask_db_settings(input_arguments, config_object: dict) -> Tuple[str, str, str, str]:
+def parse_or_ask_db_settings(input_arguments,
+                             config_object: Optional[dict]) -> Tuple[str, str, str, str]:
     """Parse database config or use flags/ask for input"""
     logger.info("Determining and establishing database connection...")
     if config_object is not None and config_object["db"] is not None:
@@ -198,7 +199,7 @@ if __name__ == "__main__":
     config: Optional[dict] = None
     if args.config is not None:
         with open(args.config, 'r', encoding='utf-8') as file:
-            config: dict = yaml.safe_load(file)
+            config = yaml.safe_load(file)
 
     db_name, db_host, db_user, db_pw = parse_or_ask_db_settings(
         args, config_object=config)
