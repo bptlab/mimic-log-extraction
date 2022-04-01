@@ -91,7 +91,8 @@ def create_db_connection(name, host, user, password):
     return con
 
 
-def ask_cohorts() -> Tuple[List[str], int, int, List[str], str, List[str]]:
+def ask_cohorts() -> Tuple[Optional[List[str]], Optional[int], Optional[int],
+                           Optional[List[str]], Optional[str], Optional[List[str]]]:
     """Ask for patient cohort filters"""
     logger.info("Determining patient cohort...")
 
