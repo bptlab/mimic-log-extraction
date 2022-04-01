@@ -12,8 +12,8 @@ from psycopg2 import connect
 
 
 from extractor import (extract_cohort, extract_cohort_for_ids, extract_admission_events,
-                    extract_transfer_events, extract_case_attributes,
-                    subject_case_attributes, hadm_case_attributes, extract_poe_events)
+                       extract_transfer_events, extract_case_attributes,
+                       subject_case_attributes, hadm_case_attributes, extract_poe_events)
 
 formatter = logging.Formatter(
     fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
@@ -36,10 +36,12 @@ parser.add_argument('--db_pw', type=str, help='Database Password')
 
 # Patient Cohort Parameters
 parser.add_argument('--subject_ids', type=str, help='Subject IDs of cohort')
-parser.add_argument('--hadm_ids', type=str, help='Hospital Admission IDs of cohort')
+parser.add_argument('--hadm_ids', type=str,
+                    help='Hospital Admission IDs of cohort')
 parser.add_argument('--icd', type=str, help='ICD code(s) of cohort')
 parser.add_argument('--icd_version', type=int, help='ICD version')
-parser.add_argument('--icd_sequence_number', type=int, help='Ranking threshold of diagnosis')
+parser.add_argument('--icd_sequence_number', type=int,
+                    help='Ranking threshold of diagnosis')
 parser.add_argument('--drg', type=str, help='DRG code(s) of cohort')
 parser.add_argument('--drg_type', type=str, help='DRG type (HCFA, APR)')
 parser.add_argument('--age', type=str, help='Patient Age of cohort')
@@ -95,9 +97,9 @@ def ask_cohorts() -> Tuple[List[str], int, int, List[str], str, List[str]]:
 
     if ask_for_icd_detail is True:
         icd_version = args.icd_version if args.icd_version is not None else int(
-        input("Enter ICD version (9, 10, 0 for both):\n"))
+            input("Enter ICD version (9, 10, 0 for both):\n"))
         icd_seq_num = args.icd_sequence_number if args.icd_sequence_number is not None else int(
-        input("Enter considered ranking threshold of diagnosis (1 is the highest priority):\n"))
+            input("Enter considered ranking threshold of diagnosis (1 is the highest priority):\n"))
 
     drg_string = args.drg if args.drg is not None else str(
         input("Enter DRG code(s) seperated by comma (Typing ALL selects all):\n"))
@@ -112,7 +114,7 @@ def ask_cohorts() -> Tuple[List[str], int, int, List[str], str, List[str]]:
 
     if ask_for_drg_detail is True:
         drg_type = args.drg_type if args.drg_type is not None else str(
-        input("Enter DRG ontology (HCFA, APR):\n"))
+            input("Enter DRG ontology (HCFA, APR):\n"))
         drg_type = None if drg_type == [''] else drg_type
 
     age_string = args.age if args.age is not None else str(
@@ -125,7 +127,7 @@ def ask_cohorts() -> Tuple[List[str], int, int, List[str], str, List[str]]:
 
 def ask_case_notion() -> str:
     """Ask for case notion: Subject_Id or Hospital_Admission_Id"""
-    # Todo: None per default
+    # todo: use ADT to encode case notion
     implemented_case_notions = ['SUBJECT', 'HOSPITAL ADMISSION']
 
     type_string = args.notion if args.notion is not None else str(
@@ -140,7 +142,6 @@ def ask_case_notion() -> str:
 
 def ask_case_attributes(case_notion) -> List[str]:
     """Ask for case attributes"""
-    # Todo: None per default
     logger.info("Determining case attributes...")
     logger.info("The following case notion was selected: " + case_notion)
     logger.info("Available case attributes:")
@@ -188,11 +189,11 @@ if __name__ == "__main__":
 
     if args.subject_ids is None and args.hadm_ids is None:
         cohort_icd_codes, cohort_icd_version, cohort_icd_seq_num, cohort_drg_codes, \
-        cohort_drg_type, cohort_age = ask_cohorts()
+            cohort_drg_type, cohort_age = ask_cohorts()
 
-    case_notion = ask_case_notion()
+    determined_case_notion = ask_case_notion()
 
-    case_attribute_list = ask_case_attributes(case_notion)
+    case_attribute_list = ask_case_attributes(determined_case_notion)
 
     event_type = ask_event_type()
 
@@ -203,11 +204,13 @@ if __name__ == "__main__":
         cohort = extract_cohort(db_cursor, cohort_icd_codes, cohort_icd_version, cohort_icd_seq_num,
                                 cohort_drg_codes, cohort_drg_type, cohort_age)
     else:
-        cohort = extract_cohort_for_ids(db_cursor, args.subject_ids, args.hadm_ids)
-    #FOR TESTING PURPOSE, SHRINKS THE COHORT TO 50 CASES
+        cohort = extract_cohort_for_ids(
+            db_cursor, args.subject_ids, args.hadm_ids)
+    # FOR TESTING PURPOSE, SHRINKS THE COHORT TO 50 CASES
     cohort = cohort[:50]
 
-    case_attributes = extract_case_attributes(db_cursor, cohort, case_notion, case_attribute_list)
+    case_attributes = extract_case_attributes(
+        db_cursor, cohort, determined_case_notion, case_attribute_list)
 
     if event_type == "ADMISSION":
         events = extract_admission_events(db_cursor, cohort)
