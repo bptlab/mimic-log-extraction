@@ -8,6 +8,8 @@ import pandas as pd
 
 logger = logging.getLogger('cli')
 
+# todo: add type annotations in method signatures
+
 
 def extract_icd_descriptions(cursor) -> pd.DataFrame:
     """Extract ICD Codes and descriptions"""
@@ -54,13 +56,15 @@ def extract_patients(cursor) -> pd.DataFrame:
     patients = pd.DataFrame(patients, columns=cols)
     return patients
 
+
 def filter_age_ranges(cohort: pd.DataFrame, ages: List[str]) -> pd.DataFrame:
     """Filter a dataframe for a list of age ranges"""
     condition_list = []
     for age_interval in ages:
         age_min = age_interval.split(":", 1)[0]
         age_max = age_interval.split(":", 1)[1]
-        condition_list.append('(age >= ' + age_min + ' and age <= ' + age_max + ')')
+        condition_list.append(
+            '(age >= ' + age_min + ' and age <= ' + age_max + ')')
     condition = 'or'.join(condition_list)
     cohort = cohort.query(condition)
     return cohort
@@ -113,6 +117,7 @@ def extract_admissions_for_admission_ids(db_cursor, hospital_admission_ids: List
     adm = pd.DataFrame(adm, columns=cols)
     return adm
 
+
 def extract_transfers_for_admission_ids(db_cursor, hospital_admission_ids: List):
     """Extract transfers for a list of hospital admission ids"""
     db_cursor.execute(
@@ -121,6 +126,7 @@ def extract_transfers_for_admission_ids(db_cursor, hospital_admission_ids: List)
     cols = list(map(lambda x: x[0], db_cursor.description))
     transfers = pd.DataFrame(transfers, columns=cols)
     return transfers
+
 
 def extract_poe_for_admission_ids(db_cursor, hospital_admission_ids: List):
     """Extract provider order entries for a list of hospital admission ids"""
@@ -134,9 +140,11 @@ def extract_poe_for_admission_ids(db_cursor, hospital_admission_ids: List):
     poe_d = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
     poe_d = pd.DataFrame(poe_d, columns=cols)
-    poe_d = poe_d.drop_duplicates("poe_id")[["poe_id", "field_name", "field_value"]]
+    poe_d = poe_d.drop_duplicates(
+        "poe_id")[["poe_id", "field_name", "field_value"]]
     poe = poe.merge(poe_d, how="left", on="poe_id")
     return poe
+
 
 def extract_table_for_admission_ids(db_cursor, hospital_admission_ids: List,
                                     mimic_module: str, table_name: str):
@@ -164,7 +172,8 @@ default_icd_list = ["42821", "42823", "42831",
 
 default_drg_list = ["194", "190", "201", "207"
                     ]
-subject_case_attributes = ["gender", "anchor_age", "anchor_year", "anchor_year_group", "dod"]
-hadm_case_attributes = ["admittime","dischtime","deathtime","admission_type","admission_location",
-                        "discharge_location","insurance","language","marital_status","ethnicity",
-                        "edregtime","edouttime","hospital_expire_flag"]
+subject_case_attributes = ["gender", "anchor_age",
+                           "anchor_year", "anchor_year_group", "dod"]
+hadm_case_attributes = ["admittime", "dischtime", "deathtime", "admission_type", "admission_location",
+                        "discharge_location", "insurance", "language", "marital_status", "ethnicity",
+                        "edregtime", "edouttime", "hospital_expire_flag"]

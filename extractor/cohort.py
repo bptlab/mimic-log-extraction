@@ -7,6 +7,9 @@ from .helper import (extract_drgs, extract_icds, filter_icd_df, filter_drg_df, g
                     extract_admissions, extract_patients, filter_age_ranges,
                     default_icd_list, default_drg_list)
 
+                
+# todo: add type annotations in method signatures
+
 logger = logging.getLogger('cli')
 
 def extract_cohort_for_ids(db_cursor, subject_ids, hadm_ids):

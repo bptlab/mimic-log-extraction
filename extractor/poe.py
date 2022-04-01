@@ -7,6 +7,7 @@ from .helper import (get_filename_string, extract_poe_for_admission_ids,
 
 logger = logging.getLogger('cli')
 
+# todo: add type annotations in method signatures
 
 def extract_poe_events(db_cursor, cohort, include_medications) -> pd.DataFrame:
     """
