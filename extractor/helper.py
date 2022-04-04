@@ -97,6 +97,15 @@ def extract_triage_stays_for_ed_stays(db_cursor, ed_stays: List):
     triage = pd.DataFrame(triage, columns=cols)
     return triage
 
+def extract_ed_table_for_ed_stays(db_cursor, ed_stays: List, table_name: str):
+    """Extract emergency department table for a list of ed stays"""
+    db_cursor.execute(
+        'SELECT * FROM mimic_ed.' + table_name + ' where stay_id = any(%s)', [ed_stays])
+    ed_table = db_cursor.fetchall()
+    cols = list(map(lambda x: x[0], db_cursor.description))
+    ed_table = pd.DataFrame(ed_table, columns=cols)
+    return ed_table
+
 
 def extract_emergency_department_stays_for_admission_ids(db_cursor, hospital_admission_ids: List):
     """Extract ed stays for a list of hospital admission ids"""
@@ -157,6 +166,16 @@ def extract_table_for_admission_ids(db_cursor, hospital_admission_ids: List,
     table = pd.DataFrame(table, columns=cols)
     return table
 
+def extract_table(db_cursor, mimic_module: str, table_name: str):
+    """Extract any table in MIMIC for a list of hospital admission ids"""
+    db_cursor.execute(
+        'SELECT * FROM ' + mimic_module + '.' + table_name)
+    table = db_cursor.fetchall()
+    cols = list(map(lambda x: x[0], db_cursor.description))
+    table = pd.DataFrame(table, columns=cols)
+    return table
+
+
 
 def get_filename_string(file_name: str, file_ending: str) -> str:
     """Creates a filename string containing the creation date"""
@@ -178,3 +197,19 @@ hadm_case_attributes = ["admittime", "dischtime", "deathtime", "admission_type",
                         "admission_location", "discharge_location", "insurance",
                         "language", "marital_status", "ethnicity",
                         "edregtime", "edouttime", "hospital_expire_flag"]
+core_tables = ["admissions", "patients", "transfers"]
+hosp_tables = ["diagnoses_icd", "drgcodes", "emar", "hcpcsevents", "labevents",
+                "microbiologyevents", "pharmacy", "poe", "prescriptions",
+                "procedures_icd", "services"]
+icu_tables = ["chartevents", "datetimeevents", "icustays", "inputevents",
+                "outputevents", "procedureevents"]
+ed_tables = ["diagnosis","edstays","medrecon table","pyxis",
+                "triage","vitalsign","vitalsign_hl7"]
+detail_tables = {"hcpcsevents":"d_hcpcs", "diagnosis_icd":"d_icd_diagnosis",
+                "procedures_icd":"d_icd_procedures", "labevents":"d_labitems",
+                "chartevents":"d_items", "datetimeevents":"d_items", "inputevents":"d_items",
+                "outputevents":"d_items", "procedureevents":"d_items"}
+detail_foreign_keys = {"d_hcpcs":"code", "d_icd_diagnosis":["icd_code", "icd_version"],
+                       "d_icd_procedures":["icd_code", "icd_version"],
+                       "d_labitems":"itemid", "d_items":"itemid"}
+                       

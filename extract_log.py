@@ -14,7 +14,8 @@ from psycopg2 import connect
 
 from extractor import (extract_cohort, extract_cohort_for_ids, extract_admission_events,
                        extract_transfer_events, extract_case_attributes,
-                       subject_case_attributes, hadm_case_attributes, extract_poe_events)
+                       subject_case_attributes, hadm_case_attributes, extract_poe_events,
+                       extract_table_events)
 
 formatter = logging.Formatter(
     fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
@@ -49,6 +50,7 @@ parser.add_argument('--age', type=str, help='Patient Age of cohort')
 
 # Event Type Parameter
 parser.add_argument('--type', type=str, help='Event Type')
+parser.add_argument('--tables', type=str, help='Low level tables')
 
 # Case Notion Parameter
 parser.add_argument('--notion', type=str, help='Case Notion')
@@ -162,21 +164,21 @@ def ask_case_attributes(case_notion) -> List[str]:
         logger.info('[%s]' % ', '.join(map(str, subject_case_attributes)))
     elif case_notion == "HOSPITAL ADMISSION":
         logger.info('[%s]' % ', '.join(map(str, hadm_case_attributes)))
-    type_string = args.case_attribute_list if args.case_attribute_list is not None else str(
+    attribute_string = args.case_attribute_list if args.case_attribute_list is not None else str(
         input("Enter case attributes seperated by comma (Press enter to choose all):\n"))
-    type_list = type_string.split(',')
-    if type_list == ['']:
+    attribute_list = attribute_string.split(',')
+    if attribute_list == ['']:
         if case_notion == "SUBJECT":
-            type_list = subject_case_attributes
+            attribute_list = subject_case_attributes
         elif case_notion == "HOSPITAL ADMISSION":
-            type_list = hadm_case_attributes
+            attribute_list = hadm_case_attributes
 
-    return type_list
+    return attribute_list
 
 
 def ask_event_type():
     """Ask for event types: Admission, Transfer, ...?"""
-    implemented_event_types = ['ADMISSION', 'TRANSFER', 'POE']
+    implemented_event_types = ['ADMISSION', 'TRANSFER', 'POE', 'OTHER']
 
     type_string = args.type if args.type is not None else str(
         input("Choose Event Type: Admission, Transfer, POE, ?\n"))
@@ -187,6 +189,18 @@ def ask_event_type():
         sys.exit("No valid event type provided.")
     return type_string.upper()
 
+def ask_tables():
+    """Ask for low level tables: Chartevents, Procedureevents, Labevents, ...?"""
+    illicit_tables = ["d_hcpcs", "d_icd_diagnoses", "d_icd_procedures",
+                      "d_labitems", "d_items", "emar_detail", "poe_detail"]
+    table_string = args.tables if args.tables is not None else str(
+    input("Enter low level tables: Chartevents, Procedureevents, Labevents, ... ?\n"))
+    table_string = table_string.lower()
+    table_list = table_string.split(",")
+    if any(x in illicit_tables for x in table_list):
+        sys.exit("Illicit tables provided.")
+    table_list = list(map(lambda table: str.replace(table, " ", ""), table_list))
+    return table_list
 
 def ask_event_attributes():
     """Ask for event attributes"""
@@ -221,8 +235,8 @@ if __name__ == "__main__":
 
     # build cohort
     if args.subject_ids is None and args.hadm_ids is None:
-        cohort = extract_cohort(db_cursor, cohort_icd_codes, cohort_icd_version, cohort_icd_seq_num,
-                                cohort_drg_codes, cohort_drg_type, cohort_age)
+        cohort = extract_cohort(db_cursor, cohort_icd_codes, cohort_icd_version,
+        cohort_icd_seq_num, cohort_drg_codes, cohort_drg_type, cohort_age)
     else:
         cohort = extract_cohort_for_ids(
             db_cursor, args.subject_ids, args.hadm_ids)
@@ -244,3 +258,6 @@ if __name__ == "__main__":
             events = extract_poe_events(db_cursor, cohort, True)
         else:
             events = extract_poe_events(db_cursor, cohort, False)
+    elif event_type == "OTHER":
+        tables_to_extract = ask_tables()
+        events = extract_table_events(db_cursor, cohort, tables_to_extract)

@@ -20,9 +20,11 @@ def extract_cohort_for_ids(db_cursor, subject_ids, hadm_ids):
     cohort = extract_admissions(db_cursor)
     if hadm_ids is not None:
         hadm_ids = hadm_ids.split(',')
+        hadm_ids = [int(hadm_id) for hadm_id in hadm_ids]
         cohort = cohort.loc[cohort["hadm_id"].isin(hadm_ids)]
     if subject_ids is not None:
         subject_ids = subject_ids.split(',')
+        subject_ids = [int(subject_id) for subject_id in subject_ids]
         cohort = cohort.loc[cohort["subject_id"].isin(subject_ids)]
 
     cohort = cohort[["subject_id", "hadm_id", "admittime"]]
