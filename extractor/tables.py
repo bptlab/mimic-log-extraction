@@ -1,6 +1,7 @@
 """Provides functionality to retrieve events from a list of tables"""
 import logging
 import pandas as pd
+from typing import List
 from .helper import (extract_table_columns, get_filename_string, extract_table_for_admission_ids,
                      extract_table, extract_emergency_department_stays_for_admission_ids,
                      extract_ed_table_for_ed_stays,
@@ -11,7 +12,7 @@ from .helper import (extract_table_columns, get_filename_string, extract_table_f
 logger = logging.getLogger('cli')
 
 
-def extract_table_events(db_cursor, cohort: pd.DataFrame, table_list: list[str]) -> pd.DataFrame:
+def extract_table_events(db_cursor, cohort: pd.DataFrame, table_list: List[str]) -> pd.DataFrame:
     """
     Extracts events from a given list of tables for a given cohort
     """
@@ -34,7 +35,7 @@ def extract_table_events(db_cursor, cohort: pd.DataFrame, table_list: list[str])
 
     return final_log
 
-def ask_activity_and_time(db_cursor, table_list: list[str]) -> dict:
+def ask_activity_and_time(db_cursor, table_list: List[str]) -> dict:
     """
     Derives columns from tables and asks for activity and timestamp column
     """
