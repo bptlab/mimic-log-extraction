@@ -34,10 +34,10 @@ def extract_case_attributes(db_cursor, cohort, case_notion, case_attribute_list)
                                                     "mimic_hosp", "diagnoses_icd")
         icd_codes = icd_codes.sort_values(["hadm_id", "seq_num"])
         icd_codes = icd_codes[["hadm_id", "icd_code"]]
-        icd_codes = icd_codes.groupby("hadm_id")["icd_code"].apply(list)
+        icd_codes = icd_codes.groupby("hadm_id")["icd_code"].apply(list) # type: ignore
         drg_codes = extract_table_for_admission_ids(db_cursor, hadm_ids, "mimic_hosp", "drgcodes")
         drg_codes = drg_codes[["hadm_id", "drg_code"]]
-        drg_codes = drg_codes.groupby("hadm_id")["drg_code"].apply(list)
+        drg_codes = drg_codes.groupby("hadm_id")["drg_code"].apply(list) # type: ignore
         hadm_df = hadm_df.merge(icd_codes, on="hadm_id", how="inner")
         hadm_df = hadm_df.merge(drg_codes, on="hadm_id", how="inner")
         case_attribute_list.append("hadm_id")
