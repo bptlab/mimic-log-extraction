@@ -1,7 +1,7 @@
 """Provides functionality to retrieve events from a list of tables"""
 import logging
-import pandas as pd
 from typing import List
+import pandas as pd
 from .helper import (extract_table_columns, get_filename_string, extract_table_for_admission_ids,
                      extract_table, extract_emergency_department_stays_for_admission_ids,
                      extract_ed_table_for_ed_stays,
