@@ -2,7 +2,7 @@
 Provides helper methods for extraction of data frames from Mimic
 """
 import logging
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 import pandas as pd
 
@@ -88,7 +88,7 @@ def filter_drg_df(hf_drg: pd.DataFrame, drg_filter_list: List[str]) -> pd.DataFr
     return hf_filter
 
 
-def extract_triage_stays_for_ed_stays(db_cursor, ed_stays: List):
+def extract_triage_stays_for_ed_stays(db_cursor, ed_stays: List) -> pd.DataFrame:
     """Extract triage stays for a list of ed stays"""
     db_cursor.execute(
         'SELECT * FROM mimic_ed.triage where stay_id = any(%s)', [ed_stays])
@@ -97,7 +97,7 @@ def extract_triage_stays_for_ed_stays(db_cursor, ed_stays: List):
     triage = pd.DataFrame(triage, columns=cols)
     return triage
 
-def extract_ed_table_for_ed_stays(db_cursor, ed_stays: List, table_name: str):
+def extract_ed_table_for_ed_stays(db_cursor, ed_stays: List, table_name: str) -> pd.DataFrame:
     """Extract emergency department table for a list of ed stays"""
     db_cursor.execute(
         'SELECT * FROM mimic_ed.' + table_name + ' where stay_id = any(%s)', [ed_stays])
@@ -107,7 +107,7 @@ def extract_ed_table_for_ed_stays(db_cursor, ed_stays: List, table_name: str):
     return ed_table
 
 
-def extract_emergency_department_stays_for_admission_ids(db_cursor, hospital_admission_ids: List):
+def extract_emergency_department_stays_for_admission_ids(db_cursor, hospital_admission_ids: List) -> pd.DataFrame:
     """Extract ed stays for a list of hospital admission ids"""
     db_cursor.execute(
         'SELECT * FROM mimic_ed.edstays where hadm_id = any(%s)', [hospital_admission_ids])
@@ -117,7 +117,7 @@ def extract_emergency_department_stays_for_admission_ids(db_cursor, hospital_adm
     return ed_stays
 
 
-def extract_admissions_for_admission_ids(db_cursor, hospital_admission_ids: List):
+def extract_admissions_for_admission_ids(db_cursor, hospital_admission_ids: List) -> pd.DataFrame:
     """Extract admissions for a list of hospital admission ids"""
     db_cursor.execute(
         'SELECT * FROM mimic_core.admissions where hadm_id = any(%s)', [hospital_admission_ids])
@@ -127,7 +127,7 @@ def extract_admissions_for_admission_ids(db_cursor, hospital_admission_ids: List
     return adm
 
 
-def extract_transfers_for_admission_ids(db_cursor, hospital_admission_ids: List):
+def extract_transfers_for_admission_ids(db_cursor, hospital_admission_ids: List) -> pd.DataFrame:
     """Extract transfers for a list of hospital admission ids"""
     db_cursor.execute(
         'SELECT * FROM mimic_core.transfers where hadm_id = any(%s)', [hospital_admission_ids])
@@ -137,7 +137,7 @@ def extract_transfers_for_admission_ids(db_cursor, hospital_admission_ids: List)
     return transfers
 
 
-def extract_poe_for_admission_ids(db_cursor, hospital_admission_ids: List):
+def extract_poe_for_admission_ids(db_cursor, hospital_admission_ids: List) -> pd.DataFrame:
     """Extract provider order entries for a list of hospital admission ids"""
     db_cursor.execute(
         'SELECT * FROM mimic_hosp.poe where hadm_id = any(%s)', [hospital_admission_ids])
@@ -156,7 +156,7 @@ def extract_poe_for_admission_ids(db_cursor, hospital_admission_ids: List):
 
 
 def extract_table_for_admission_ids(db_cursor, hospital_admission_ids: List,
-                                    mimic_module: str, table_name: str):
+                                    mimic_module: str, table_name: str) -> pd.DataFrame:
     """Extract any table in MIMIC for a list of hospital admission ids"""
     db_cursor.execute(
         'SELECT * FROM ' + mimic_module + '.' + table_name +
@@ -166,7 +166,7 @@ def extract_table_for_admission_ids(db_cursor, hospital_admission_ids: List,
     table = pd.DataFrame(table, columns=cols)
     return table
 
-def extract_table(db_cursor, mimic_module: str, table_name: str):
+def extract_table(db_cursor, mimic_module: str, table_name: str) -> pd.DataFrame:
     """Extract any table in MIMIC for a list of hospital admission ids"""
     db_cursor.execute(
         'SELECT * FROM ' + mimic_module + '.' + table_name)
@@ -175,14 +175,14 @@ def extract_table(db_cursor, mimic_module: str, table_name: str):
     table = pd.DataFrame(table, columns=cols)
     return table
 
-def extract_table_columns(db_cursor, mimic_module: str, table_name: str):
+def extract_table_columns(db_cursor, mimic_module: str, table_name: str) -> pd.DataFrame:
     """Extract columns from a table"""
     db_cursor.execute(
         'SELECT * FROM ' + mimic_module + '.' + table_name + ' where 1=0')
     cols = list(map(lambda x: x[0], db_cursor.description))
     return cols
 
-def get_table_module(table_name: str) -> str:
+def get_table_module(table_name: str) -> Optional[str]:
     """Provides module for a given table name"""
     if table_name in core_tables:
         module = "mimic_core"
