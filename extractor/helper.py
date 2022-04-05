@@ -182,6 +182,21 @@ def extract_table_columns(db_cursor, mimic_module: str, table_name: str):
     cols = list(map(lambda x: x[0], db_cursor.description))
     return cols
 
+def get_table_module(table_name: str) -> str:
+    """Provides module for a given table name"""
+    if table_name in core_tables:
+        module = "mimic_core"
+    elif table_name in hosp_tables:
+        module = "mimic_hosp"
+    elif table_name in icu_tables:
+        module = "mimic_icu"
+    elif table_name in ed_tables:
+        module = "mimic_ed"
+    else:
+        module = None
+
+    return module
+
 
 
 def get_filename_string(file_name: str, file_ending: str) -> str:

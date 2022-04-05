@@ -4,8 +4,7 @@ from typing import List
 import pandas as pd
 from .helper import (extract_table_columns, get_filename_string, extract_table_for_admission_ids,
                      extract_table, extract_emergency_department_stays_for_admission_ids,
-                     extract_ed_table_for_ed_stays,
-                     core_tables, hosp_tables, icu_tables, ed_tables, detail_tables,
+                     extract_ed_table_for_ed_stays, get_table_module, detail_tables,
                      detail_foreign_keys)
 
 
@@ -41,14 +40,8 @@ def ask_activity_and_time(db_cursor, table_list: List[str]) -> dict:
     """
     chosen_activity_time = {}
     for table in table_list:
-        if table in core_tables:
-            module = "mimic_core"
-        elif table in hosp_tables:
-            module = "mimic_hosp"
-        elif table in icu_tables:
-            module = "mimic_icu"
-        elif table in ed_tables:
-            module = "mimic_ed"
+
+        module = get_table_module(table)
 
         table_columns = extract_table_columns(db_cursor, module, table)
 
@@ -89,14 +82,8 @@ def extract_tables(db_cursor, table_list, hospital_admission_ids,
 
     for table in table_list:
 
-        if table in core_tables:
-            module = "mimic_core"
-        elif table in hosp_tables:
-            module = "mimic_hosp"
-        elif table in icu_tables:
-            module = "mimic_icu"
-        elif table in ed_tables:
-            module = "mimic_ed"
+        module = get_table_module(table)
+
         if module == "mimic_ed":
             ed_stays = extract_emergency_department_stays_for_admission_ids(
                         db_cursor, hospital_admission_ids)
