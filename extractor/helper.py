@@ -175,6 +175,13 @@ def extract_table(db_cursor, mimic_module: str, table_name: str):
     table = pd.DataFrame(table, columns=cols)
     return table
 
+def extract_table_columns(db_cursor, mimic_module: str, table_name: str):
+    """Extract columns from a table"""
+    db_cursor.execute(
+        'SELECT * FROM ' + mimic_module + '.' + table_name + ' where 1=0')
+    cols = list(map(lambda x: x[0], db_cursor.description))
+    return cols
+
 
 
 def get_filename_string(file_name: str, file_ending: str) -> str:
@@ -208,8 +215,8 @@ ed_tables = ["diagnosis","edstays","medrecon table","pyxis",
 detail_tables = {"hcpcsevents":"d_hcpcs", "diagnosis_icd":"d_icd_diagnosis",
                 "procedures_icd":"d_icd_procedures", "labevents":"d_labitems",
                 "chartevents":"d_items", "datetimeevents":"d_items", "inputevents":"d_items",
-                "outputevents":"d_items", "procedureevents":"d_items"}
+                "outputevents":"d_items", "procedureevents":"d_items", "poe":"poe_detail"}
 detail_foreign_keys = {"d_hcpcs":"code", "d_icd_diagnosis":["icd_code", "icd_version"],
                        "d_icd_procedures":["icd_code", "icd_version"],
-                       "d_labitems":"itemid", "d_items":"itemid"}
-                       
+                       "d_labitems":"itemid", "d_items":"itemid",
+                       "poe_detail":["poe_id", "poe_seq", "subject_id"]}
