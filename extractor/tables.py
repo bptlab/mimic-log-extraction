@@ -52,7 +52,7 @@ def ask_activity_and_time(db_cursor, table_list: List[str]) -> dict:
         if detail_table is not None:
             detail_columns = extract_table_columns(db_cursor, module, detail_table)
 
-        table_columns = table_columns + detail_columns
+        table_columns = table_columns + detail_columns # type: ignore
 
         time_columns = list(filter(lambda col: "time" in col or "date" in col, table_columns))
         ativity_columns = list(filter(lambda col: "time" not in col and "date" not in col
@@ -103,7 +103,8 @@ def extract_tables(db_cursor, table_list, hospital_admission_ids,
         if detail_table is not None:
             detail_content = extract_table(db_cursor, module, detail_table)
             detail_foreign_key = detail_foreign_keys[detail_table]
-            table_content = table_content.merge(detail_content, on=detail_foreign_key, how="left")
+            table_content = table_content.merge(detail_content,                    # type: ignore
+                                                on=detail_foreign_key, how="left") # type: ignore
 
 
         table_content = table_content.rename(columns={

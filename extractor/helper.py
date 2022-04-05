@@ -2,7 +2,7 @@
 Provides helper methods for extraction of data frames from Mimic
 """
 import logging
-from typing import List, Optional
+from typing import List
 from datetime import datetime
 import pandas as pd
 
@@ -107,7 +107,8 @@ def extract_ed_table_for_ed_stays(db_cursor, ed_stays: List, table_name: str) ->
     return ed_table
 
 
-def extract_emergency_department_stays_for_admission_ids(db_cursor, hospital_admission_ids: List) -> pd.DataFrame:
+def extract_emergency_department_stays_for_admission_ids(db_cursor, hospital_admission_ids: List
+                                                        ) -> pd.DataFrame:
     """Extract ed stays for a list of hospital admission ids"""
     db_cursor.execute(
         'SELECT * FROM mimic_ed.edstays where hadm_id = any(%s)', [hospital_admission_ids])
@@ -175,14 +176,14 @@ def extract_table(db_cursor, mimic_module: str, table_name: str) -> pd.DataFrame
     table = pd.DataFrame(table, columns=cols)
     return table
 
-def extract_table_columns(db_cursor, mimic_module: str, table_name: str) -> pd.DataFrame:
+def extract_table_columns(db_cursor, mimic_module: str, table_name: str) -> List[str]:
     """Extract columns from a table"""
     db_cursor.execute(
         'SELECT * FROM ' + mimic_module + '.' + table_name + ' where 1=0')
     cols = list(map(lambda x: x[0], db_cursor.description))
     return cols
 
-def get_table_module(table_name: str) -> Optional[str]:
+def get_table_module(table_name: str) -> str:
     """Provides module for a given table name"""
     if table_name in core_tables:
         module = "mimic_core"
@@ -192,8 +193,6 @@ def get_table_module(table_name: str) -> Optional[str]:
         module = "mimic_icu"
     elif table_name in ed_tables:
         module = "mimic_ed"
-    else:
-        module = None
 
     return module
 

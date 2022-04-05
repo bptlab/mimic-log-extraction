@@ -31,7 +31,7 @@ def extract_poe_events(db_cursor, cohort, include_medications) -> pd.DataFrame:
         'prod_strength','form_rx', 'dose_val_rx', 'dose_unit_rx', 'form_val_disp',
         'form_unit_disp']]
         medications = pharmacy.merge(prescriptions, on=["pharmacy_id"], how="left")
-        medications.drop_duplicates("poe_id", inplace=True)
+        medications.drop_duplicates("poe_id", inplace=True) # type: ignore
         poe_with_medications = poe.merge(medications, on=["poe_id", "subject_id", "hadm_id"],
                                         how="left")
         poe_with_medications.loc[poe_with_medications["order_type"] == "Medications",
