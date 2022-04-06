@@ -40,7 +40,7 @@ def ask_activity_and_time(db_cursor, table_list: List[str]) -> dict:
     """
     chosen_activity_time = {}
     for table in table_list:
-
+        detail_columns = []
         module = get_table_module(table)
 
         table_columns = extract_table_columns(db_cursor, module, table)
