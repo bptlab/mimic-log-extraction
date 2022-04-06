@@ -15,7 +15,7 @@ from psycopg2 import connect
 from extractor import (extract_cohort, extract_cohort_for_ids, extract_admission_events,
                        extract_transfer_events, extract_case_attributes,
                        subject_case_attributes, hadm_case_attributes, extract_poe_events,
-                       extract_table_events)
+                       extract_table_events, illicit_tables)
 
 formatter = logging.Formatter(
     fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
@@ -191,8 +191,6 @@ def ask_event_type():
 
 def ask_tables():
     """Ask for low level tables: Chartevents, Procedureevents, Labevents, ...?"""
-    illicit_tables = ["d_hcpcs", "d_icd_diagnoses", "d_icd_procedures",
-                      "d_labitems", "d_items", "emar_detail", "poe_detail"]
     table_string = args.tables if args.tables is not None else str(
     input("Enter low level tables: Chartevents, Procedureevents, Labevents, ... ?\n"))
     table_string = table_string.lower()
