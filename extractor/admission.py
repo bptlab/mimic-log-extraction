@@ -32,9 +32,11 @@ def extract_admission_events(db_cursor, cohort) -> pd.DataFrame:
                              "deathtime", "edregtime", "edouttime"]
         for col in admissions.columns:
             if col in column_labels:
+                if pd.isna(row[col]):
+                    continue
                 activity = col.replace('time', '')
                 new_row = {"case_id": row["subject_id"],
-                           "activity": activity, "timestamp": row[col]}
+                        "activity": activity, "timestamp": row[col]}
                 event_dict[i] = new_row
                 i = i + 1
     log = pd.DataFrame.from_dict(event_dict, "index")  # type: ignore

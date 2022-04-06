@@ -19,7 +19,6 @@ def extract_poe_events(db_cursor, cohort, include_medications) -> pd.DataFrame:
     hospital_admission_ids = list(cohort["hadm_id"].unique())
     hospital_admission_ids = [float(i) for i in hospital_admission_ids]
     admission_ids = hospital_admission_ids
-
     poe = extract_poe_for_admission_ids(db_cursor, admission_ids)
 
     if include_medications is True:
