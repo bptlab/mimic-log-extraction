@@ -21,7 +21,7 @@ def extract_transfer_events(db_cursor, cohort) -> pd.DataFrame:
 
     transfers = extract_transfers_for_admission_ids(db_cursor, admission_ids)
 
-    transfers.loc[transfers["eventtype"] == "discharge", "careunit"] = "Discharge"
+    transfers.loc[transfers["eventtype"] == "discharge", "careunit"] = "Discharge" # type: ignore
 
     transfers = transfers.sort_values(["hadm_id", "intime"])
 
