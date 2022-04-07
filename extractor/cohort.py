@@ -55,7 +55,6 @@ def extract_cohort(db_cursor, icd_codes, icd_version, icd_seq_num,
 
     if icd_codes is None:
         logger.info("Skipping ICD code filtering...")
-        icd_filter_list = icd_codes
     else:
         logger.info("Using supplied ICD codes for cohort...")
         icd_filter_list = icd_codes
@@ -63,7 +62,6 @@ def extract_cohort(db_cursor, icd_codes, icd_version, icd_seq_num,
 
     if drg_codes is None:
         logger.info("Skipping DRG code filtering...")
-        drg_filter_list = drg_codes
     else:
         logger.info("Using supplied DRG codes for cohort...")
         drg_filter_list = drg_codes
