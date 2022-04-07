@@ -4,8 +4,7 @@ Provides functionality for extracting a cohort defined by ICD and DRG codes, as 
 import logging
 import pandas as pd
 from .helper import (extract_drgs, extract_icds, filter_icd_df, filter_drg_df, get_filename_string,
-                     extract_admissions, extract_patients, filter_age_ranges,
-                     default_icd_list, default_drg_list)
+                     extract_admissions, extract_patients, filter_age_ranges)
 
 
 # todo: add type annotations in method signatures
@@ -54,27 +53,20 @@ def extract_cohort(db_cursor, icd_codes, icd_version, icd_seq_num,
 
     logger.info("Begin extracting cohort!")
 
-    if icd_codes is not None:
-        if "ALL" in icd_codes:
-            logger.info("Skipping ICD code filtering...")
-            icd_filter_list = icd_codes
-        else:
-            logger.info("Using supplied ICD codes for cohort...")
-            icd_filter_list = icd_codes
+    if icd_codes is None:
+        logger.info("Skipping ICD code filtering...")
+        icd_filter_list = icd_codes
     else:
-        logger.info("Using default ICD codes for cohort...")
-        icd_filter_list = default_icd_list
+        logger.info("Using supplied ICD codes for cohort...")
+        icd_filter_list = icd_codes
 
-    if drg_codes is not None:
-        if "ALL" in drg_codes:
-            logger.info("Skipping DRG code filtering...")
-            drg_filter_list = drg_codes
-        else:
-            logger.info("Using supplied DRG codes for cohort...")
-            drg_filter_list = drg_codes
+
+    if drg_codes is None:
+        logger.info("Skipping DRG code filtering...")
+        drg_filter_list = drg_codes
     else:
-        logger.info("Using default DRG codes for cohort...")
-        drg_filter_list = default_drg_list
+        logger.info("Using supplied DRG codes for cohort...")
+        drg_filter_list = drg_codes
 
     cohort = extract_admissions(db_cursor)
     cohort = cohort[["subject_id", "hadm_id", "admittime"]]
@@ -101,7 +93,7 @@ def extract_cohort(db_cursor, icd_codes, icd_version, icd_seq_num,
     icds = extract_icds(db_cursor)
 
     # Filter for relevant ICD codes
-    if "ALL" not in icd_filter_list:
+    if icd_codes is not None:
         icd_cohort = filter_icd_df(icds=icds, icd_filter_list=icd_filter_list,
                                    icd_version=icd_version)
         icd_cohort = icd_cohort.loc[icd_cohort["seq_num"] <= icd_seq_num]
@@ -115,7 +107,7 @@ def extract_cohort(db_cursor, icd_codes, icd_version, icd_seq_num,
         cohort = cohort.merge(icd_cohort, on="hadm_id", how="inner")
 
     # Filter for relevnt DRG codes
-    if "ALL" not in drg_filter_list:
+    if drg_codes is not None:
         drgs = drgs.loc[drgs["drg_type"] == drg_type]
         drg_cohort = filter_drg_df(drgs, drg_filter_list)
         cohort = cohort.loc[cohort["hadm_id"].isin(

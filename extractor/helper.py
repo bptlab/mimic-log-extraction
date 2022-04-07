@@ -204,14 +204,6 @@ def get_filename_string(file_name: str, file_ending: str) -> str:
     return file_name + "_" + date + file_ending
 
 
-default_icd_list = ["42821", "42823", "42831",
-                    "42833", "42841", "42843",
-                    "I5021", "I5023", "I5031",
-                    "I5033", "I5041", "I5042",
-                    "I5043", "I5811", "I5813"]
-
-default_drg_list = ["194", "190", "201", "207"
-                    ]
 
 subject_case_attributes = ["gender", "anchor_age",
                            "anchor_year", "anchor_year_group", "dod"]

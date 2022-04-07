@@ -99,38 +99,29 @@ def ask_cohorts() -> Tuple[Optional[List[str]], Optional[int], Optional[int],
     logger.info("Determining patient cohort...")
 
     icd_string = args.icd if args.icd is not None else str(
-        input("Enter ICD code(s) seperated by comma (Typing ALL selects all):\n"))
+        input("Enter ICD code(s) seperated by comma (Press enter to choose all):\n"))
     icd_codes = icd_string.split(',')
     icd_codes = None if icd_codes == [''] else icd_codes
 
-    if icd_codes is not None and "ALL" in icd_codes:
-        ask_for_icd_detail = False
+    if icd_codes is None:
         icd_version = None
         icd_seq_num = None
     else:
-        ask_for_icd_detail = True
-
-    if ask_for_icd_detail is True:
         icd_version = args.icd_version if args.icd_version is not None else int(
             input("Enter ICD version (9, 10, 0 for both):\n"))
         icd_seq_num = args.icd_sequence_number if args.icd_sequence_number is not None else int(
             input("Enter considered ranking threshold of diagnosis (1 is the highest priority):\n"))
 
     drg_string = args.drg if args.drg is not None else str(
-        input("Enter DRG code(s) seperated by comma (Typing ALL selects all):\n"))
+        input("Enter DRG code(s) seperated by comma (Press enter to choose all):\n"))
     drg_codes = drg_string.split(',')
     drg_codes = None if drg_codes == [''] else drg_codes
 
-    if drg_codes is not None and "ALL" in drg_codes:
-        ask_for_drg_detail = False
+    if drg_codes is None:
         drg_type = None
     else:
-        ask_for_drg_detail = True
-
-    if ask_for_drg_detail is True:
         drg_type = args.drg_type if args.drg_type is not None else str(
             input("Enter DRG ontology (HCFA, APR):\n"))
-        drg_type = None if drg_type == [''] else drg_type
 
     age_string = args.age if args.age is not None else str(
         input("Enter Patient Age ranges seperated by comma, e.g. 0:20,50:90:\n"))
@@ -249,9 +240,9 @@ if __name__ == "__main__":
     elif event_type == "TRANSFER":
         events = extract_transfer_events(db_cursor, cohort)
     elif event_type == "POE":
-        include_medications = input("""POE links to medication tables
-        (pharmacy, emar, prescriptions).\n Shall the medication events be enhanced by the 
-        concrete medications prescribed? (Y/N)""")
+        include_medications = input("""POE links to medication tables \
+(pharmacy, emar, prescriptions).\nShall the medication events be enhanced by the \
+concrete medications prescribed? (Y/N):""")
         if include_medications == "Y":
             events = extract_poe_events(db_cursor, cohort, True)
         else:
