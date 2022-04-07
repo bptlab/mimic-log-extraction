@@ -35,14 +35,14 @@ def extract_admission_events(db_cursor, cohort) -> pd.DataFrame:
                 if pd.isna(row[col]):
                     continue
                 activity = col.replace('time', '')
-                new_row = {"case_id": row["subject_id"],
+                new_row = {"hadm_id": row["hadm_id"],
                         "activity": activity, "timestamp": row[col]}
                 event_dict[i] = new_row
                 i = i + 1
+
     log = pd.DataFrame.from_dict(event_dict, "index")  # type: ignore
     log = log.sort_values("timestamp")
     log = log.reset_index().drop("index", axis=1)
-
     filename = get_filename_string("admission_log", ".csv")
     log.to_csv("output/" + filename)
 
