@@ -35,7 +35,7 @@ def extract_admission_events(db_cursor, cohort) -> pd.DataFrame:
                 if pd.isna(row[col]):
                     continue
                 activity = col.replace('time', '')
-                new_row = {"hadm_id": row["hadm_id"],
+                new_row = {"hadm_id": row["hadm_id"], "subject_id" : row["subject_id"],
                         "activity": activity, "timestamp": row[col]}
                 event_dict[i] = new_row
                 i = i + 1

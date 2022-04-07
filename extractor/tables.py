@@ -90,6 +90,7 @@ def extract_tables(db_cursor, table_list, hospital_admission_ids,
             ed_stays = ed_stays[["subject_id", "hadm_id", "stay_id"]]
             ed_stay_list = list(ed_stays["stay_id"])
             table_content = extract_ed_table_for_ed_stays(db_cursor, ed_stay_list, table)
+            print(table_content.columns)
             table_content = table_content.merge(ed_stays, on=["stay_id", "subject_id"], how="inner")
         else:
             table_content = extract_table_for_admission_ids(

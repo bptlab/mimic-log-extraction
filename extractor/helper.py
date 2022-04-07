@@ -87,20 +87,21 @@ def filter_drg_df(hf_drg: pd.DataFrame, drg_filter_list: List[str]) -> pd.DataFr
         drg_filter_list)]
     return hf_filter
 
+def build_sql_query(table_module: str, table_name: str, id_type: str) -> str:
+    """Generates sql query"""
+    sql_query = 'select ' + table_module + '.'+ table_name +'.* \
+                       from ' + table_module + '.'+ table_name +' join (values {0}) \
+                       as to_join('+ id_type + ') \
+                       ON ' + table_module + '.'+ table_name +'.' + id_type + ' \
+                       = to_join.' + id_type
+    return sql_query
 
-def extract_triage_stays_for_ed_stays(db_cursor, ed_stays: List) -> pd.DataFrame:
-    """Extract triage stays for a list of ed stays"""
-    db_cursor.execute(
-        'SELECT * FROM mimic_ed.triage where stay_id = any(%s)', [ed_stays])
-    triage = db_cursor.fetchall()
-    cols = list(map(lambda x: x[0], db_cursor.description))
-    triage = pd.DataFrame(triage, columns=cols)
-    return triage
 
 def extract_ed_table_for_ed_stays(db_cursor, ed_stays: List, table_name: str) -> pd.DataFrame:
     """Extract emergency department table for a list of ed stays"""
-    db_cursor.execute(
-        'SELECT * FROM mimic_ed.' + table_name + ' where stay_id = any(%s)', [ed_stays])
+    sql_id_list = prepare_id_list_for_sql(ed_stays)
+    sql_query = build_sql_query("mimic_ed", table_name, "stay_id")
+    db_cursor.execute(sql_query.format(sql_id_list))
     ed_table = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
     ed_table = pd.DataFrame(ed_table, columns=cols)
@@ -110,8 +111,9 @@ def extract_ed_table_for_ed_stays(db_cursor, ed_stays: List, table_name: str) ->
 def extract_emergency_department_stays_for_admission_ids(db_cursor, hospital_admission_ids: List
                                                         ) -> pd.DataFrame:
     """Extract ed stays for a list of hospital admission ids"""
-    db_cursor.execute(
-        'SELECT * FROM mimic_ed.edstays where hadm_id = any(%s)', [hospital_admission_ids])
+    sql_id_list = prepare_id_list_for_sql(hospital_admission_ids)
+    sql_query = build_sql_query("mimic_ed", "edstays", "hadm_id")
+    db_cursor.execute(sql_query.format(sql_id_list))
     ed_stays = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
     ed_stays = pd.DataFrame(ed_stays, columns=cols)
@@ -120,8 +122,9 @@ def extract_emergency_department_stays_for_admission_ids(db_cursor, hospital_adm
 
 def extract_admissions_for_admission_ids(db_cursor, hospital_admission_ids: List) -> pd.DataFrame:
     """Extract admissions for a list of hospital admission ids"""
-    db_cursor.execute(
-        'SELECT * FROM mimic_core.admissions where hadm_id = any(%s)', [hospital_admission_ids])
+    sql_id_list = prepare_id_list_for_sql(hospital_admission_ids)
+    sql_query = build_sql_query("mimic_core", "admissions", "hadm_id")
+    db_cursor.execute(sql_query.format(sql_id_list))
     adm = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
     adm = pd.DataFrame(adm, columns=cols)
@@ -130,8 +133,9 @@ def extract_admissions_for_admission_ids(db_cursor, hospital_admission_ids: List
 
 def extract_transfers_for_admission_ids(db_cursor, hospital_admission_ids: List) -> pd.DataFrame:
     """Extract transfers for a list of hospital admission ids"""
-    db_cursor.execute(
-        'SELECT * FROM mimic_core.transfers where hadm_id = any(%s)', [hospital_admission_ids])
+    sql_id_list = prepare_id_list_for_sql(hospital_admission_ids)
+    sql_query = build_sql_query("mimic_core", "transfers", "hadm_id")
+    db_cursor.execute(sql_query.format(sql_id_list))
     transfers = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
     transfers = pd.DataFrame(transfers, columns=cols)
@@ -140,8 +144,9 @@ def extract_transfers_for_admission_ids(db_cursor, hospital_admission_ids: List)
 
 def extract_poe_for_admission_ids(db_cursor, hospital_admission_ids: List) -> pd.DataFrame:
     """Extract provider order entries for a list of hospital admission ids"""
-    db_cursor.execute(
-        'SELECT * FROM mimic_hosp.poe where hadm_id = any(%s)', [hospital_admission_ids])
+    sql_id_list = prepare_id_list_for_sql(hospital_admission_ids)
+    sql_query = build_sql_query("mimic_hosp", "poe", "hadm_id")
+    db_cursor.execute(sql_query.format(sql_id_list))
     poe = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
     poe = pd.DataFrame(poe, columns=cols)
@@ -159,9 +164,9 @@ def extract_poe_for_admission_ids(db_cursor, hospital_admission_ids: List) -> pd
 def extract_table_for_admission_ids(db_cursor, hospital_admission_ids: List,
                                     mimic_module: str, table_name: str) -> pd.DataFrame:
     """Extract any table in MIMIC for a list of hospital admission ids"""
-    db_cursor.execute(
-        'SELECT * FROM ' + mimic_module + '.' + table_name +
-        ' where hadm_id = any(%s)', [hospital_admission_ids])
+    sql_id_list = prepare_id_list_for_sql(hospital_admission_ids)
+    sql_query = build_sql_query(mimic_module, table_name, "hadm_id")
+    db_cursor.execute(sql_query.format(sql_id_list))
     table = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
     table = pd.DataFrame(table, columns=cols)
@@ -196,7 +201,13 @@ def get_table_module(table_name: str) -> str:
 
     return module
 
-
+def prepare_id_list_for_sql(id_list: List) -> str:
+    """Prepares a list of ids for the sql statement"""
+    id_list = [str(i) for i in id_list]
+    sql_list = '), ('.join(['', *id_list, ''])
+    sql_list = sql_list[3:]
+    sql_list = sql_list[:len(sql_list)-3]
+    return sql_list
 
 def get_filename_string(file_name: str, file_ending: str) -> str:
     """Creates a filename string containing the creation date"""

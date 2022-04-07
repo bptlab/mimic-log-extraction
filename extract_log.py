@@ -150,19 +150,24 @@ def ask_case_attributes(case_notion) -> List[str]:
     """Ask for case attributes"""
     logger.info("Determining case attributes...")
     logger.info("The following case notion was selected: %s", case_notion)
-    logger.info("Available case attributes:")
-    if case_notion == "SUBJECT":
-        logger.info('[%s]' % ', '.join(map(str, subject_case_attributes)))
-    elif case_notion == "HOSPITAL ADMISSION":
-        logger.info('[%s]' % ', '.join(map(str, hadm_case_attributes)))
-    attribute_string = args.case_attribute_list if args.case_attribute_list is not None else str(
-        input("Enter case attributes seperated by comma (Press enter to choose all):\n"))
-    attribute_list = attribute_string.split(',')
-    if attribute_list == ['']:
+    case_attribute_decision = input("Do you want to skip case attribute extraction? (Y/N):")
+    if case_attribute_decision == "N":
+        logger.info("Available case attributes:")
         if case_notion == "SUBJECT":
-            attribute_list = subject_case_attributes
+            logger.info('[%s]' % ', '.join(map(str, subject_case_attributes)))
         elif case_notion == "HOSPITAL ADMISSION":
-            attribute_list = hadm_case_attributes
+            logger.info('[%s]' % ', '.join(map(str, hadm_case_attributes)))
+        attribute_string = args.case_attribute_list if args.case_attribute_list is not None \
+            else str(
+            input("Enter case attributes seperated by comma (Press enter to choose all):\n"))
+        attribute_list = attribute_string.split(',')
+        if attribute_list == ['']:
+            if case_notion == "SUBJECT":
+                attribute_list = subject_case_attributes
+            elif case_notion == "HOSPITAL ADMISSION":
+                attribute_list = hadm_case_attributes
+    else:
+        attribute_list = ["SKIP"]
 
     return attribute_list
 
@@ -230,9 +235,9 @@ if __name__ == "__main__":
         cohort = extract_cohort_for_ids(
             db_cursor, args.subject_ids, args.hadm_ids)
     # FOR TESTING PURPOSE, SHRINKS THE COHORT TO 50 CASES
-    cohort = cohort[:50]  # type: ignore
-
-    case_attributes = extract_case_attributes(
+    #cohort = cohort[:100]  # type: ignore
+    if "SKIP" not in case_attribute_list:
+        case_attributes = extract_case_attributes(
         db_cursor, cohort, determined_case_notion, case_attribute_list)
 
     if event_type == "ADMISSION":
