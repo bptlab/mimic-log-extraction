@@ -261,7 +261,7 @@ concrete medications prescribed? (Y/N):""")
         else:
             TABLES_ACTIVITIES = None
         if args.tables_timestamps is not None:
-            tables_timestamps = args.tables_timestamps.split(',')
+            TABLES_TIMESTAMPS = args.tables_timestamps.split(',')
         else:
             TABLES_TIMESTAMPS = None
         events = extract_table_events(db_cursor, cohort, tables_to_extract,
