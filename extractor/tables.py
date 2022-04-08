@@ -1,6 +1,6 @@
 """Provides functionality to retrieve events from a list of tables"""
 import logging
-from typing import List
+from typing import List, Optional
 import pandas as pd
 from .helper import (extract_table_columns, get_filename_string, extract_table_for_admission_ids,
                      extract_table, extract_emergency_department_stays_for_admission_ids,
@@ -11,7 +11,9 @@ from .helper import (extract_table_columns, get_filename_string, extract_table_f
 logger = logging.getLogger('cli')
 
 
-def extract_table_events(db_cursor, cohort: pd.DataFrame, table_list: List[str]) -> pd.DataFrame:
+def extract_table_events(db_cursor, cohort: pd.DataFrame, table_list: List[str],
+                         tables_activities: Optional[List[str]],
+                         tables_timestamps: Optional[List[str]]) -> pd.DataFrame:
     """
     Extracts events from a given list of tables for a given cohort
     """
@@ -21,7 +23,7 @@ def extract_table_events(db_cursor, cohort: pd.DataFrame, table_list: List[str])
     hospital_admission_ids = list(cohort["hadm_id"].unique())
     hospital_admission_ids = [float(i) for i in hospital_admission_ids]
 
-    chosen_activity_time = ask_activity_and_time(db_cursor, table_list)
+    chosen_activity_time = ask_activity_and_time(db_cursor, table_list, tables_activities, tables_timestamps)
 
     logger.info("Extracting events from provided tables. This may take a while...")
 
@@ -34,41 +36,47 @@ def extract_table_events(db_cursor, cohort: pd.DataFrame, table_list: List[str])
 
     return final_log
 
-def ask_activity_and_time(db_cursor, table_list: List[str]) -> dict:
+def ask_activity_and_time(db_cursor, table_list: List[str], tables_activities: Optional[List[str]],
+                         tables_timestamps: Optional[List[str]]) -> dict:
     """
     Derives columns from tables and asks for activity and timestamp column
     """
     chosen_activity_time = {}
     for table in table_list:
-        detail_columns = []
-        module = get_table_module(table)
+        if tables_activities is None and tables_timestamps is None:
+            detail_columns = []
+            module = get_table_module(table)
 
-        table_columns = extract_table_columns(db_cursor, module, table)
+            table_columns = extract_table_columns(db_cursor, module, table)
 
-        try:
-            detail_table = detail_tables[table]
-        except KeyError:
-            detail_table = None
-        if detail_table is not None:
-            detail_columns = extract_table_columns(db_cursor, module, detail_table)
+            try:
+                detail_table = detail_tables[table]
+            except KeyError:
+                detail_table = None
+            if detail_table is not None:
+                detail_columns = extract_table_columns(db_cursor, module, detail_table)
 
-        table_columns = table_columns + detail_columns # type: ignore
+            table_columns = table_columns + detail_columns # type: ignore
 
-        time_columns = list(filter(lambda col: "time" in col or "date" in col, table_columns))
-        ativity_columns = list(filter(lambda col: "time" not in col and "date" not in col
-                                                        and "id" not in col, table_columns))
+            time_columns = list(filter(lambda col: "time" in col or "date" in col, table_columns))
+            ativity_columns = list(filter(lambda col: "time" not in col and "date" not in col
+                                                            and "id" not in col, table_columns))
 
-        logger.info("The table %s includes the following activity columns: ", table)
-        logger.info('[%s]' % ', '.join(map(str, ativity_columns)))
-        chosen_activity_column = input("Choose the activity column:")
+            logger.info("The table %s includes the following activity columns: ", table)
+            logger.info('[%s]' % ', '.join(map(str, ativity_columns)))
+            chosen_activity_column = input("Choose the activity column:")
 
-        if len(time_columns) == 1:
-            chosen_time_column = time_columns[0]
+            if len(time_columns) == 1:
+                chosen_time_column = time_columns[0]
+            else:
+                logger.info("The table %s includes multiple timestamps: ", table)
+                logger.info('[%s]' % ', '.join(map(str, time_columns)))
+                chosen_time_column = input("Choose the timestamp column:")
+            chosen_activity_time[table] = [chosen_activity_column, chosen_time_column]
         else:
-            logger.info("The table %s includes multiple timestamps: ", table)
-            logger.info('[%s]' % ', '.join(map(str, time_columns)))
-            chosen_time_column = input("Choose the timestamp column:")
-        chosen_activity_time[table] = [chosen_activity_column, chosen_time_column]
+            table_index = table_list.index(table)
+            chosen_activity_time[table] = [tables_activities[table_index], 
+                                           tables_timestamps[table_index]]
 
     return chosen_activity_time
 

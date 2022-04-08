@@ -51,6 +51,8 @@ parser.add_argument('--age', type=str, help='Patient Age of cohort')
 # Event Type Parameter
 parser.add_argument('--type', type=str, help='Event Type')
 parser.add_argument('--tables', type=str, help='Low level tables')
+parser.add_argument('--tables_activities', type=str, help='Activity Columns for Low level tables')
+parser.add_argument('--tables_timestamps', type=str, help='Timestamp Columns for Low level tables')
 
 # Case Notion Parameter
 parser.add_argument('--notion', type=str, help='Case Notion')
@@ -254,4 +256,13 @@ concrete medications prescribed? (Y/N):""")
             events = extract_poe_events(db_cursor, cohort, False)
     elif event_type == "OTHER":
         tables_to_extract = ask_tables()
-        events = extract_table_events(db_cursor, cohort, tables_to_extract)
+        if args.tables_activities is not None:
+            tables_activities = args.tables_activities.split(',')
+        else:
+            tables_activities = None
+        if args.tables_timestamps is not None:
+            tables_timestamps = args.tables_timestamps.split(',')
+        else:
+            tables_timestamps = None
+        events = extract_table_events(db_cursor, cohort, tables_to_extract, 
+                                      tables_activities, tables_timestamps)
