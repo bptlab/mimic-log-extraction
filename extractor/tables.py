@@ -23,7 +23,8 @@ def extract_table_events(db_cursor, cohort: pd.DataFrame, table_list: List[str],
     hospital_admission_ids = list(cohort["hadm_id"].unique())
     hospital_admission_ids = [float(i) for i in hospital_admission_ids]
 
-    chosen_activity_time = ask_activity_and_time(db_cursor, table_list, tables_activities, tables_timestamps)
+    chosen_activity_time = ask_activity_and_time(db_cursor, table_list, tables_activities,
+                                                 tables_timestamps)
 
     logger.info("Extracting events from provided tables. This may take a while...")
 
@@ -73,9 +74,9 @@ def ask_activity_and_time(db_cursor, table_list: List[str], tables_activities: O
                 logger.info('[%s]' % ', '.join(map(str, time_columns)))
                 chosen_time_column = input("Choose the timestamp column:")
             chosen_activity_time[table] = [chosen_activity_column, chosen_time_column]
-        else:
+        elif tables_activities is not None and tables_timestamps is not None:
             table_index = table_list.index(table)
-            chosen_activity_time[table] = [tables_activities[table_index], 
+            chosen_activity_time[table] = [tables_activities[table_index],
                                            tables_timestamps[table_index]]
 
     return chosen_activity_time

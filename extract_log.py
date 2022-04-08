@@ -257,12 +257,12 @@ concrete medications prescribed? (Y/N):""")
     elif event_type == "OTHER":
         tables_to_extract = ask_tables()
         if args.tables_activities is not None:
-            tables_activities = args.tables_activities.split(',')
+            TABLES_ACTIVITIES = args.tables_activities.split(',')
         else:
-            tables_activities = None
+            TABLES_ACTIVITIES = None
         if args.tables_timestamps is not None:
             tables_timestamps = args.tables_timestamps.split(',')
         else:
-            tables_timestamps = None
-        events = extract_table_events(db_cursor, cohort, tables_to_extract, 
-                                      tables_activities, tables_timestamps)
+            TABLES_TIMESTAMPS = None
+        events = extract_table_events(db_cursor, cohort, tables_to_extract,
+                                      TABLES_ACTIVITIES, TABLES_TIMESTAMPS)
