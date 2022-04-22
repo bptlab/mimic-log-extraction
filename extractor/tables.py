@@ -110,12 +110,17 @@ def extract_tables(db_cursor, table_list, hospital_admission_ids,
             detail_table = None
 
         if detail_table is not None:
-            detail_content = extract_table(db_cursor, module, detail_table)
+            if detail_table == "prescriptions":
+                detail_content = extract_table_for_admission_ids(db_cursor, hospital_admission_ids, 
+                                                                module, detail_table)
+                detail_content = detail_content[['pharmacy_id', 'drug_type', 'drug', 'gsn', 'ndc',
+                'prod_strength','form_rx', 'dose_val_rx', 'dose_unit_rx', 'form_val_disp',
+                'form_unit_disp']]
+            else:
+                detail_content = extract_table(db_cursor, module, detail_table)
             detail_foreign_key = detail_foreign_keys[detail_table]
             table_content = table_content.merge(detail_content,                    # type: ignore
                                                 on=detail_foreign_key, how="left") # type: ignore
-
-
         table_content = table_content.rename(columns={
                                                 chosen_activity_time[table][1]:"time:timestamp",
                                                 chosen_activity_time[table][0]:"concept:name"})
