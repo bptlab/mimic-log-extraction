@@ -5,6 +5,7 @@ import logging
 from typing import List
 from datetime import datetime
 import pandas as pd
+import pandasql as ps
 
 logger = logging.getLogger('cli')
 
@@ -213,6 +214,26 @@ def get_filename_string(file_name: str, file_ending: str) -> str:
     """Creates a filename string containing the creation date"""
     date = datetime.now().strftime("%d-%m-%Y-%H_%M_%S")
     return file_name + "_" + date + file_ending
+
+def join_event_attributes_with_log_events(log: pd.DataFrame, event_attributes: pd.DataFrame, # pylint: disable=unused-argument, line-too-long  \
+                                         case_notion: str, time_column: str, start_column: str,\
+                                         end_column: str) -> pd.DataFrame:
+    """Joins event attribute events with events in an event log"""
+
+    sqlcode = '''
+    select *
+    from event_attributes
+    inner join log on event_attributes.''' + case_notion + '''=log.''' + case_notion + '''
+    where event_attributes.''' + time_column + ''' >= log.''' + start_column + '''
+    and event_attributes.''' + time_column + ''' <= log.''' + end_column
+
+    joined_df = ps.sqldf(sqlcode,locals())
+    joined_df = joined_df.loc[:,~joined_df.columns.duplicated()]
+    joined_df = joined_df.sort_values([case_notion, time_column])
+    joined_df = joined_df.reset_index()
+    joined_df = joined_df.drop("index", axis=1)
+
+    return joined_df
 
 
 

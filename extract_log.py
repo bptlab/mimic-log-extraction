@@ -15,7 +15,9 @@ from psycopg2 import connect
 from extractor import (extract_cohort, extract_cohort_for_ids, extract_admission_events,
                        extract_transfer_events, extract_case_attributes,
                        subject_case_attributes, hadm_case_attributes, extract_poe_events,
-                       extract_table_events, illicit_tables)
+                       extract_table_events, extract_table_columns, illicit_tables,
+                       get_table_module, get_filename_string)
+from extractor.event_attributes import extract_event_attributes
 
 formatter = logging.Formatter(
     fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
@@ -198,10 +200,43 @@ def ask_tables():
     table_list = list(map(lambda table: str.replace(table, " ", ""), table_list))
     return table_list
 
-def ask_event_attributes():
+def ask_event_attributes(event_log) -> Tuple[str, str, str, str, str, str, str, str]:
     """Ask for event attributes"""
-    # Todo: None per default
-    return None
+    table_columns = list(event_log.columns)
+    time_columns = list(filter(lambda col: "time" in col or "date" in col, table_columns))
+    logger.info("The following time columns are available:")
+    logger.info(time_columns)
+    start_col = input("""Enter the column name of the timestamp indicating the
+start of the events: \n""")
+    end_col = input("""Enter the column name of the timestamp indicating the
+end of the events: \n""")
+    table = input("""Enter the table name including the event attributes: \n""")
+    module = get_table_module(table)
+    table_columns = extract_table_columns(db_cursor, module, table)
+    time_columns = list(filter(lambda col: "time" in col or "date" in col, table_columns))
+    logger.info("The following time columns are available:")
+    logger.info(time_columns)
+    time_col = input("""Enter the column name of the timestamp in the table
+which should be aggregated: \n""")
+    column_to_agg = input("""Enter the column names which should be aggregated: \n""")
+    column_to_agg = column_to_agg.split(",")
+    agg_method = input("""Enter the aggregation method (Mean, Median,
+Sum, Count, First): \n""")
+    filter_col = input("""If only a part of the table should be aggregated, you can provide a
+column to filter on (e.g. label in labevents for filtering specific
+laboratory values): \n""")
+    if filter_col == "":
+        filter_col = None
+    filter_val = input("""Enter the values which should be used for filtering the
+provided column (e.g. laboratory values, medications,
+procedures, ...): \n""")
+    if filter_val == "":
+        filter_val = None
+    else:
+        filter_val = filter_val.split(",")
+
+    return start_col, end_col, time_col, table, column_to_agg, \
+           agg_method, filter_col, filter_val
 
 
 if __name__ == "__main__":
@@ -227,8 +262,6 @@ if __name__ == "__main__":
 
     event_type = ask_event_type()
 
-    # event_attributes = ask_event_attributes()
-
     # build cohort
     if args.subject_ids is None and args.hadm_ids is None:
         cohort = extract_cohort(db_cursor, cohort_icd_codes, cohort_icd_version,
@@ -236,8 +269,7 @@ if __name__ == "__main__":
     else:
         cohort = extract_cohort_for_ids(
             db_cursor, args.subject_ids, args.hadm_ids)
-    # FOR TESTING PURPOSE, SHRINKS THE COHORT TO 50 CASES
-    #cohort = cohort[:100]  # type: ignore
+
     if "SKIP" not in case_attribute_list:
         case_attributes = extract_case_attributes(
         db_cursor, cohort, determined_case_notion, case_attribute_list)
@@ -266,3 +298,18 @@ concrete medications prescribed? (Y/N):""")
             TABLES_TIMESTAMPS = None
         events = extract_table_events(db_cursor, cohort, tables_to_extract,
                                       TABLES_ACTIVITIES, TABLES_TIMESTAMPS)
+
+    event_attribute_decision = input("""Shall the event log be enhanced by additional event \
+attributes from other tables in the database? (Y/N):""")
+
+    while event_attribute_decision == "Y":
+        start_column, end_column, time_column, table_to_aggregate, column_to_aggregate,\
+        aggregation_method, filter_column, filter_values = ask_event_attributes(events)
+        events = extract_event_attributes(db_cursor, events, start_column, end_column,
+                                         time_column, table_to_aggregate, column_to_aggregate,\
+                                         aggregation_method, filter_column, filter_values)
+        event_attribute_decision = input("""Shall the event log be enhanced by additional event \
+attributes from other tables in the database? (Y/N):""")
+    if event_attribute_decision == "N":
+        filename = get_filename_string("event_attribute_enhanced_log", ".csv")
+        events.to_csv("output/" + filename)

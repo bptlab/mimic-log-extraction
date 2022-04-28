@@ -81,8 +81,8 @@ def ask_activity_and_time(db_cursor, table_list: List[str], tables_activities: O
 
     return chosen_activity_time
 
-def extract_tables(db_cursor, table_list, hospital_admission_ids,
-                   chosen_activity_time) -> pd.DataFrame:
+def extract_tables(db_cursor, table_list: List[str], hospital_admission_ids: List[float],
+                   chosen_activity_time: Optional[dict]) -> pd.DataFrame:
     """
     Extracts given tables from the database and generates an event log
     """
@@ -121,9 +121,11 @@ def extract_tables(db_cursor, table_list, hospital_admission_ids,
             detail_foreign_key = detail_foreign_keys[detail_table]
             table_content = table_content.merge(detail_content,                    # type: ignore
                                                 on=detail_foreign_key, how="left") # type: ignore
-        table_content = table_content.rename(columns={
-                                                chosen_activity_time[table][1]:"time:timestamp",
-                                                chosen_activity_time[table][0]:"concept:name"})
+
+        if chosen_activity_time is not None:
+            table_content = table_content.rename(columns={
+                                                    chosen_activity_time[table][1]:"time:timestamp",
+                                                    chosen_activity_time[table][0]:"concept:name"})
 
         final_log = pd.concat([final_log, table_content])
 
