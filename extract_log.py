@@ -200,7 +200,8 @@ def ask_tables():
     table_list = list(map(lambda table: str.replace(table, " ", ""), table_list))
     return table_list
 
-def ask_event_attributes(event_log) -> Tuple[str, str, str, str, str, str, str, str]:
+def ask_event_attributes(event_log) -> Tuple[str, str, str, str, List[str], \
+                                             str, Optional[str], Optional[List[str]]]:
     """Ask for event attributes"""
     table_columns = list(event_log.columns)
     time_columns = list(filter(lambda col: "time" in col or "date" in col, table_columns))
