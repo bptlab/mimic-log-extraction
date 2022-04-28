@@ -220,23 +220,25 @@ end of the events: \n""")
     time_col = input("""Enter the column name of the timestamp in the table
 which should be aggregated: \n""")
     column_to_agg = input("""Enter the column names which should be aggregated: \n""")
-    column_to_agg = column_to_agg.split(",")
+    column_to_agg_list = column_to_agg.split(",")
     agg_method = input("""Enter the aggregation method (Mean, Median,
 Sum, Count, First): \n""")
-    filter_col = input("""If only a part of the table should be aggregated, you can provide a
-column to filter on (e.g. label in labevents for filtering specific
+    filter_col_string = input("""If only a part of the table should be aggregated,
+you can provide a column to filter on (e.g. label in labevents for filtering specific
 laboratory values): \n""")
-    if filter_col == "":
+    if filter_col_string == "":
         filter_col = None
-    filter_val = input("""Enter the values which should be used for filtering the
+    else:
+        filter_col = filter_col_string
+    filter_val_string = input("""Enter the values which should be used for filtering the
 provided column (e.g. laboratory values, medications,
 procedures, ...): \n""")
-    if filter_val == "":
+    if filter_val_string == "":
         filter_val = None
     else:
-        filter_val = filter_val.split(",")
+        filter_val = filter_val_string.split(",")
 
-    return start_col, end_col, time_col, table, column_to_agg, \
+    return start_col, end_col, time_col, table, column_to_agg_list, \
            agg_method, filter_col, filter_val
 
 
