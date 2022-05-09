@@ -34,7 +34,8 @@ logger.addHandler(handler)
 parser = argparse.ArgumentParser(
     description='A CLI tool for extracting event logs out of MIMIC Databases.')
 
-# Todo: sanity check argument inputs before using later on!
+# TODO: sanity check argument inputs before using later on!
+# TODO: add all question-answer style parameters to config object
 
 # Database Parameters
 parser.add_argument('--db_name', type=str, help='Database Name')
@@ -77,7 +78,7 @@ def parse_or_ask_db_settings(input_arguments,
     logger.info("Determining and establishing database connection...")
     if config_object is not None and config_object["db"] is not None:
         db_config = config_object["db"]
-        # todo: check for missing config keys
+        # TODO: check for missing config keys
         input_db_name = db_config["name"]
         input_db_host = db_config["host"]
         input_db_user = db_config["user"]
@@ -141,7 +142,7 @@ def ask_cohorts() -> Tuple[Optional[List[str]], Optional[int], Optional[int],
 
 def ask_case_notion() -> str:
     """Ask for case notion: Subject_Id or Hospital_Admission_Id"""
-    # todo: use ADT to encode case notion
+    # TODO: use ADT to encode case notion
     implemented_case_notions = ['SUBJECT', 'HOSPITAL ADMISSION']
 
     type_string = args.notion if args.notion is not None else str(

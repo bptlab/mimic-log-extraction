@@ -6,7 +6,8 @@ from .helper import (get_filename_string, extract_transfers_for_admission_ids)
 
 logger = logging.getLogger('cli')
 
-# todo: add type annotations in method signatures
+# TODO: add type annotations in method signatures
+
 
 def extract_transfer_events(db_cursor, cohort) -> pd.DataFrame:
     """

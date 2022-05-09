@@ -9,7 +9,7 @@ warnings.filterwarnings("ignore")
 
 logger = logging.getLogger('cli')
 
-# todo: add type annotations in method signatures
+# TODO: add type annotations in method signatures
 
 def extract_event_attributes(db_cursor, log, start_column, end_column, time_column, \
                             table_to_aggregate, column_to_aggregate, \

@@ -8,7 +8,8 @@ from .helper import (extract_admissions_for_admission_ids, extract_patients, get
 
 logger = logging.getLogger('cli')
 
-# todo: add type annotations in method signatures
+# TODO: add type annotations in method signatures
+
 
 def extract_case_attributes(db_cursor, cohort, case_notion, case_attribute_list) -> pd.DataFrame:
     """

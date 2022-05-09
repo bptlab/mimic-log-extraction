@@ -7,7 +7,7 @@ from .helper import (extract_drgs, extract_icds, filter_icd_df, filter_drg_df, g
                      extract_admissions, extract_patients, filter_age_ranges)
 
 
-# todo: add type annotations in method signatures
+# TODO: add type annotations in method signatures
 
 logger = logging.getLogger('cli')
 
@@ -48,7 +48,7 @@ def extract_cohort(db_cursor, icd_codes, icd_version, icd_seq_num,
     """
     Selects a cohort of patient filtered by age,
     as well as ICD and DRG codes.
-    Todo: ignores age filter so far
+    TODO: ignores age filter so far
     """
 
     logger.info("Begin extracting cohort!")
@@ -58,7 +58,6 @@ def extract_cohort(db_cursor, icd_codes, icd_version, icd_seq_num,
     else:
         logger.info("Using supplied ICD codes for cohort...")
         icd_filter_list = icd_codes
-
 
     if drg_codes is None:
         logger.info("Skipping DRG code filtering...")

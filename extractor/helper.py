@@ -9,7 +9,7 @@ import pandasql as ps
 
 logger = logging.getLogger('cli')
 
-# todo: add type annotations in method signatures
+# TODO: add type annotations in method signatures
 
 
 def extract_icd_descriptions(cursor) -> pd.DataFrame:
