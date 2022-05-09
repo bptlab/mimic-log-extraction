@@ -8,6 +8,10 @@ import logging
 import sys
 from typing import List, Optional, Tuple
 
+from pm4py.objects.conversion.log import converter as log_converter # type: ignore
+from pm4py.objects.log.exporter.xes import exporter as xes_exporter # type: ignore
+
+
 import yaml
 from psycopg2 import connect
 
@@ -150,11 +154,11 @@ def ask_case_notion() -> str:
     return type_string.upper()
 
 
-def ask_case_attributes(case_notion) -> List[str]:
+def ask_case_attributes(case_notion) -> Optional[List[str]]:
     """Ask for case attributes"""
     logger.info("Determining case attributes...")
     logger.info("The following case notion was selected: %s", case_notion)
-    case_attribute_decision = input("Do you want to skip case attribute extraction? (Y/N):")
+    case_attribute_decision = input("Do you want to skip case attribute extraction? (Y/N):").upper()
     if case_attribute_decision == "N":
         logger.info("Available case attributes:")
         if case_notion == "SUBJECT":
@@ -171,7 +175,7 @@ def ask_case_attributes(case_notion) -> List[str]:
             elif case_notion == "HOSPITAL ADMISSION":
                 attribute_list = hadm_case_attributes
     else:
-        attribute_list = ["SKIP"]
+        attribute_list = None
 
     return attribute_list
 
@@ -273,7 +277,7 @@ if __name__ == "__main__":
         cohort = extract_cohort_for_ids(
             db_cursor, args.subject_ids, args.hadm_ids)
 
-    if "SKIP" not in case_attribute_list:
+    if case_attribute_list is not None:
         case_attributes = extract_case_attributes(
         db_cursor, cohort, determined_case_notion, case_attribute_list)
 
@@ -284,7 +288,7 @@ if __name__ == "__main__":
     elif event_type == "POE":
         include_medications = input("""POE links to medication tables \
 (pharmacy, emar, prescriptions).\nShall the medication events be enhanced by the \
-concrete medications prescribed? (Y/N):""")
+concrete medications prescribed? (Y/N):""").upper()
         if include_medications == "Y":
             events = extract_poe_events(db_cursor, cohort, True)
         else:
@@ -305,7 +309,7 @@ concrete medications prescribed? (Y/N):""")
     event_attribute_decision = input("""Shall the event log be enhanced by additional event \
 attributes from other tables in the database? (Y/N):""")
 
-    while event_attribute_decision == "Y":
+    while event_attribute_decision.upper() == "Y":
         start_column, end_column, time_column, table_to_aggregate, column_to_aggregate,\
         aggregation_method, filter_column, filter_values = ask_event_attributes(events)
         events = extract_event_attributes(db_cursor, events, start_column, end_column,
@@ -313,6 +317,36 @@ attributes from other tables in the database? (Y/N):""")
                                          aggregation_method, filter_column, filter_values)
         event_attribute_decision = input("""Shall the event log be enhanced by additional event \
 attributes from other tables in the database? (Y/N):""")
-    if event_attribute_decision == "N":
-        filename = get_filename_string("event_attribute_enhanced_log", ".csv")
-        events.to_csv("output/" + filename)
+    if event_attribute_decision.upper() == "N":
+
+        csv_filename = get_filename_string("event_attribute_enhanced_log", ".csv")
+        events.to_csv("output/" + csv_filename)
+
+        # set case id key based on determined case notion
+        if determined_case_notion == 'SUBJECT':
+            CASE_ID_KEY = 'subject_id'
+        elif determined_case_notion == 'HOSPITAL ADMISSION':
+            CASE_ID_KEY = 'hadm_id'
+
+        # rename every case attribute to have case prefix
+        if case_attribute_list is not None and case_attributes is not None:
+            # join case attr to events
+            if determined_case_notion == 'SUBJECT':
+                events = events.merge(case_attributes, on='subject_id', how='left')
+            elif determined_case_notion == 'HOSPITAL ADMISSION':
+                events = events.merge(case_attributes, on='hadm_id', how='left')
+
+            # rename case id key, as this will be affected too
+            CASE_ID_KEY = 'case:' + CASE_ID_KEY
+            for case_attr in case_attribute_list:
+                events.rename(
+                    columns={case_attr: "case:" + case_attr}, inplace=True)
+
+        parameters = {log_converter.Variants.TO_EVENT_LOG.value
+                      .Parameters.CASE_ID_KEY: CASE_ID_KEY,
+                      log_converter.Variants.TO_EVENT_LOG.value
+                      .Parameters.CASE_ATTRIBUTE_PREFIX: 'case:'}
+        event_log_object = log_converter.apply(
+            events, parameters=parameters, variant=log_converter.Variants.TO_EVENT_LOG)
+        filename = get_filename_string("event_attribute_enhanced_log", ".xes")
+        xes_exporter.apply(event_log_object, "output/" + filename)
