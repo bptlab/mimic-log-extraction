@@ -126,9 +126,10 @@ def extract_tables(db_cursor, table_list: List[str], hospital_admission_ids: Lis
             if detail_table == "prescriptions":
                 detail_content = extract_table_for_admission_ids(db_cursor, hospital_admission_ids,
                                                                  module, detail_table)
-                detail_content = detail_content[['pharmacy_id', 'drug_type', 'drug', 'gsn', 'ndc',
-                                                 'prod_strength', 'form_rx', 'dose_val_rx', 'dose_unit_rx', 'form_val_disp',
-                                                 'form_unit_disp']]
+                detail_content = detail_content[['pharmacy_id', 'drug_type', 'drug', 'gsn',
+                                                 'ndc', 'prod_strength', 'form_rx',
+                                                 'dose_val_rx', 'dose_unit_rx',
+                                                 'form_val_disp', 'form_unit_disp']]
             else:
                 detail_content = extract_table(db_cursor, module, detail_table)
             detail_foreign_key = detail_foreign_keys[detail_table]

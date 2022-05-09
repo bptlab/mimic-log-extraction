@@ -9,7 +9,8 @@ logger = logging.getLogger('cli')
 # TODO: add type annotations in method signatures
 
 
-def extract_admission_events(db_cursor, cohort: pd.DataFrame, save_intermediate: bool) -> pd.DataFrame:
+def extract_admission_events(db_cursor, cohort: pd.DataFrame,
+                             save_intermediate: bool) -> pd.DataFrame:
     """
     Extracts transfer events for a given cohort
     """
