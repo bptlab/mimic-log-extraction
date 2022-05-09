@@ -8,8 +8,8 @@ import logging
 import sys
 from typing import List, Optional, Tuple
 
-from pm4py.objects.conversion.log import converter as log_converter # type: ignore
-from pm4py.objects.log.exporter.xes import exporter as xes_exporter # type: ignore
+from pm4py.objects.conversion.log import converter as log_converter  # type: ignore
+from pm4py.objects.log.exporter.xes import exporter as xes_exporter  # type: ignore
 
 
 import yaml
@@ -58,8 +58,10 @@ parser.add_argument('--age', type=str, help='Patient Age of cohort')
 # Event Type Parameter
 parser.add_argument('--type', type=str, help='Event Type')
 parser.add_argument('--tables', type=str, help='Low level tables')
-parser.add_argument('--tables_activities', type=str, help='Activity Columns for Low level tables')
-parser.add_argument('--tables_timestamps', type=str, help='Timestamp Columns for Low level tables')
+parser.add_argument('--tables_activities', type=str,
+                    help='Activity Columns for Low level tables')
+parser.add_argument('--tables_timestamps', type=str,
+                    help='Timestamp Columns for Low level tables')
 
 # Case Notion Parameter
 parser.add_argument('--notion', type=str, help='Case Notion')
@@ -73,8 +75,10 @@ parser.add_argument('--config', type=str,
 
 # Argument to store intermediate dataframes to disk
 parser.add_argument('--save_intermediate', action='store_true')
-parser.add_argument('--ignore_intermediate', dest='save_intermediate', action='store_false')
+parser.add_argument('--ignore_intermediate',
+                    dest='save_intermediate', action='store_false')
 parser.set_defaults(save_intermediate=False)
+
 
 def parse_or_ask_db_settings(input_arguments,
                              config_object: Optional[dict]) -> Tuple[str, str, str, str]:
@@ -163,7 +167,8 @@ def ask_case_attributes(case_notion) -> Optional[List[str]]:
     """Ask for case attributes"""
     logger.info("Determining case attributes...")
     logger.info("The following case notion was selected: %s", case_notion)
-    case_attribute_decision = input("Do you want to skip case attribute extraction? (Y/N):").upper()
+    case_attribute_decision = input(
+        "Do you want to skip case attribute extraction? (Y/N):").upper()
     if case_attribute_decision == "N":
         logger.info("Available case attributes:")
         if case_notion == "SUBJECT":
@@ -172,7 +177,7 @@ def ask_case_attributes(case_notion) -> Optional[List[str]]:
             logger.info('[%s]' % ', '.join(map(str, hadm_case_attributes)))
         attribute_string = args.case_attribute_list if args.case_attribute_list is not None \
             else str(
-            input("Enter case attributes seperated by comma (Press enter to choose all):\n"))
+                input("Enter case attributes seperated by comma (Press enter to choose all):\n"))
         attribute_list = attribute_string.split(',')
         if attribute_list == ['']:
             if case_notion == "SUBJECT":
@@ -198,37 +203,44 @@ def ask_event_type():
         sys.exit("No valid event type provided.")
     return type_string.upper()
 
+
 def ask_tables():
     """Ask for low level tables: Chartevents, Procedureevents, Labevents, ...?"""
     table_string = args.tables if args.tables is not None else str(
-    input("Enter low level tables: Chartevents, Procedureevents, Labevents, ... ?\n"))
+        input("Enter low level tables: Chartevents, Procedureevents, Labevents, ... ?\n"))
     table_string = table_string.lower()
     table_list = table_string.split(",")
     if any(x in illicit_tables for x in table_list):
         sys.exit("Illicit tables provided.")
-    table_list = list(map(lambda table: str.replace(table, " ", ""), table_list))
+    table_list = list(
+        map(lambda table: str.replace(table, " ", ""), table_list))
     return table_list
 
-def ask_event_attributes(event_log) -> Tuple[str, str, str, str, List[str], \
+
+def ask_event_attributes(event_log) -> Tuple[str, str, str, str, List[str],
                                              str, Optional[str], Optional[List[str]]]:
     """Ask for event attributes"""
     table_columns = list(event_log.columns)
-    time_columns = list(filter(lambda col: "time" in col or "date" in col, table_columns))
+    time_columns = list(
+        filter(lambda col: "time" in col or "date" in col, table_columns))
     logger.info("The following time columns are available:")
     logger.info(time_columns)
     start_col = input("""Enter the column name of the timestamp indicating the
 start of the events: \n""")
     end_col = input("""Enter the column name of the timestamp indicating the
 end of the events: \n""")
-    table = input("""Enter the table name including the event attributes: \n""")
+    table = input(
+        """Enter the table name including the event attributes: \n""")
     module = get_table_module(table)
     table_columns = extract_table_columns(db_cursor, module, table)
-    time_columns = list(filter(lambda col: "time" in col or "date" in col, table_columns))
+    time_columns = list(
+        filter(lambda col: "time" in col or "date" in col, table_columns))
     logger.info("The following time columns are available:")
     logger.info(time_columns)
     time_col = input("""Enter the column name of the timestamp in the table
 which should be aggregated: \n""")
-    column_to_agg = input("""Enter the column names which should be aggregated: \n""")
+    column_to_agg = input(
+        """Enter the column names which should be aggregated: \n""")
     column_to_agg_list = column_to_agg.split(",")
     agg_method = input("""Enter the aggregation method (Mean, Median,
 Sum, Count, First): \n""")
@@ -248,7 +260,7 @@ procedures, ...): \n""")
         filter_val = filter_val_string.split(",")
 
     return start_col, end_col, time_col, table, column_to_agg_list, \
-           agg_method, filter_col, filter_val
+        agg_method, filter_col, filter_val
 
 
 if __name__ == "__main__":
@@ -280,14 +292,14 @@ if __name__ == "__main__":
     # build cohort
     if args.subject_ids is None and args.hadm_ids is None:
         cohort = extract_cohort(db_cursor, cohort_icd_codes, cohort_icd_version,
-        cohort_icd_seq_num, cohort_drg_codes, cohort_drg_type, cohort_age, SAVE_INTERMEDIATE)
+                                cohort_icd_seq_num, cohort_drg_codes, cohort_drg_type, cohort_age, SAVE_INTERMEDIATE)
     else:
         cohort = extract_cohort_for_ids(
             db_cursor, args.subject_ids, args.hadm_ids, SAVE_INTERMEDIATE)
 
     if case_attribute_list is not None:
         case_attributes = extract_case_attributes(
-        db_cursor, cohort, determined_case_notion, case_attribute_list, SAVE_INTERMEDIATE)
+            db_cursor, cohort, determined_case_notion, case_attribute_list, SAVE_INTERMEDIATE)
 
     if event_type == "ADMISSION":
         events = extract_admission_events(db_cursor, cohort, SAVE_INTERMEDIATE)
@@ -298,9 +310,11 @@ if __name__ == "__main__":
 (pharmacy, emar, prescriptions).\nShall the medication events be enhanced by the \
 concrete medications prescribed? (Y/N):""").upper()
         if include_medications == "Y":
-            events = extract_poe_events(db_cursor, cohort, True, SAVE_INTERMEDIATE)
+            events = extract_poe_events(
+                db_cursor, cohort, True, SAVE_INTERMEDIATE)
         else:
-            events = extract_poe_events(db_cursor, cohort, False, SAVE_INTERMEDIATE)
+            events = extract_poe_events(
+                db_cursor, cohort, False, SAVE_INTERMEDIATE)
     elif event_type == "OTHER":
         tables_to_extract = ask_tables()
         if args.tables_activities is not None:
@@ -319,15 +333,17 @@ attributes from other tables in the database? (Y/N):""")
 
     while event_attribute_decision.upper() == "Y":
         start_column, end_column, time_column, table_to_aggregate, column_to_aggregate,\
-        aggregation_method, filter_column, filter_values = ask_event_attributes(events)
+            aggregation_method, filter_column, filter_values = ask_event_attributes(
+                events)
         events = extract_event_attributes(db_cursor, events, start_column, end_column,
-                                         time_column, table_to_aggregate, column_to_aggregate,\
-                                         aggregation_method, filter_column, filter_values)
+                                          time_column, table_to_aggregate, column_to_aggregate,
+                                          aggregation_method, filter_column, filter_values)
         event_attribute_decision = input("""Shall the event log be enhanced by additional event \
 attributes from other tables in the database? (Y/N):""")
     if event_attribute_decision.upper() == "N":
         if SAVE_INTERMEDIATE:
-            csv_filename = get_filename_string("event_attribute_enhanced_log", ".csv")
+            csv_filename = get_filename_string(
+                "event_attribute_enhanced_log", ".csv")
             events.to_csv("output/" + csv_filename)
 
         # set case id key based on determined case notion
@@ -340,9 +356,11 @@ attributes from other tables in the database? (Y/N):""")
         if case_attribute_list is not None and case_attributes is not None:
             # join case attr to events
             if determined_case_notion == 'SUBJECT':
-                events = events.merge(case_attributes, on='subject_id', how='left')
+                events = events.merge(
+                    case_attributes, on='subject_id', how='left')
             elif determined_case_notion == 'HOSPITAL ADMISSION':
-                events = events.merge(case_attributes, on='hadm_id', how='left')
+                events = events.merge(
+                    case_attributes, on='hadm_id', how='left')
 
             # rename case id key, as this will be affected too
             CASE_ID_KEY = 'case:' + CASE_ID_KEY

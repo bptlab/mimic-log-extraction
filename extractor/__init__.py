@@ -6,7 +6,7 @@ from .case_attributes import extract_case_attributes
 from .poe import extract_poe_events
 from .tables import extract_table_events
 from .helper import subject_case_attributes, hadm_case_attributes, illicit_tables, \
-                    extract_table_columns, get_table_module, get_filename_string
+    extract_table_columns, get_table_module, get_filename_string
 
 __all__ = [
     'extract_cohort',

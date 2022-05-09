@@ -88,12 +88,13 @@ def filter_drg_df(hf_drg: pd.DataFrame, drg_filter_list: List[str]) -> pd.DataFr
         drg_filter_list)]
     return hf_filter
 
+
 def build_sql_query(table_module: str, table_name: str, id_type: str) -> str:
     """Generates sql query"""
-    sql_query = 'select ' + table_module + '.'+ table_name +'.* \
-                       from ' + table_module + '.'+ table_name +' join (values {0}) \
-                       as to_join('+ id_type + ') \
-                       ON ' + table_module + '.'+ table_name +'.' + id_type + ' \
+    sql_query = 'select ' + table_module + '.' + table_name + '.* \
+                       from ' + table_module + '.' + table_name + ' join (values {0}) \
+                       as to_join(' + id_type + ') \
+                       ON ' + table_module + '.' + table_name + '.' + id_type + ' \
                        = to_join.' + id_type
     return sql_query
 
@@ -110,7 +111,7 @@ def extract_ed_table_for_ed_stays(db_cursor, ed_stays: List, table_name: str) ->
 
 
 def extract_emergency_department_stays_for_admission_ids(db_cursor, hospital_admission_ids: List
-                                                        ) -> pd.DataFrame:
+                                                         ) -> pd.DataFrame:
     """Extract ed stays for a list of hospital admission ids"""
     sql_id_list = prepare_id_list_for_sql(hospital_admission_ids)
     sql_query = build_sql_query("mimic_ed", "edstays", "hadm_id")
@@ -173,6 +174,7 @@ def extract_table_for_admission_ids(db_cursor, hospital_admission_ids: List,
     table = pd.DataFrame(table, columns=cols)
     return table
 
+
 def extract_table(db_cursor, mimic_module: str, table_name: str) -> pd.DataFrame:
     """Extract any table in MIMIC for a list of hospital admission ids"""
     db_cursor.execute(
@@ -182,12 +184,14 @@ def extract_table(db_cursor, mimic_module: str, table_name: str) -> pd.DataFrame
     table = pd.DataFrame(table, columns=cols)
     return table
 
+
 def extract_table_columns(db_cursor, mimic_module: str, table_name: str) -> List[str]:
     """Extract columns from a table"""
     db_cursor.execute(
         'SELECT * FROM ' + mimic_module + '.' + table_name + ' where 1=0')
     cols = list(map(lambda x: x[0], db_cursor.description))
     return cols
+
 
 def get_table_module(table_name: str) -> str:
     """Provides module for a given table name"""
@@ -202,6 +206,7 @@ def get_table_module(table_name: str) -> str:
 
     return module
 
+
 def prepare_id_list_for_sql(id_list: List) -> str:
     """Prepares a list of ids for the sql statement"""
     id_list = [str(i) for i in id_list]
@@ -210,14 +215,16 @@ def prepare_id_list_for_sql(id_list: List) -> str:
     sql_list = sql_list[:len(sql_list)-3]
     return sql_list
 
+
 def get_filename_string(file_name: str, file_ending: str) -> str:
     """Creates a filename string containing the creation date"""
     date = datetime.now().strftime("%d-%m-%Y-%H_%M_%S")
     return file_name + "_" + date + file_ending
 
-def join_event_attributes_with_log_events(log: pd.DataFrame, event_attributes: pd.DataFrame, # pylint: disable=unused-argument, line-too-long  \
-                                         case_notion: str, time_column: str, start_column: str,\
-                                         end_column: str) -> pd.DataFrame:
+
+def join_event_attributes_with_log_events(log: pd.DataFrame, event_attributes: pd.DataFrame,  # pylint: disable=unused-argument, line-too-long  \
+                                          case_notion: str, time_column: str, start_column: str,\
+                                          end_column: str) -> pd.DataFrame:
     """Joins event attribute events with events in an event log"""
 
     sqlcode = '''
@@ -227,14 +234,13 @@ def join_event_attributes_with_log_events(log: pd.DataFrame, event_attributes: p
     where event_attributes.''' + time_column + ''' >= log.''' + start_column + '''
     and event_attributes.''' + time_column + ''' <= log.''' + end_column
 
-    joined_df = ps.sqldf(sqlcode,locals())
-    joined_df = joined_df.loc[:,~joined_df.columns.duplicated()]
+    joined_df = ps.sqldf(sqlcode, locals())
+    joined_df = joined_df.loc[:, ~joined_df.columns.duplicated()]
     joined_df = joined_df.sort_values([case_notion, time_column])
     joined_df = joined_df.reset_index()
     joined_df = joined_df.drop("index", axis=1)
 
     return joined_df
-
 
 
 subject_case_attributes = ["gender", "anchor_age",
@@ -249,25 +255,25 @@ hadm_case_attributes = ["admittime", "dischtime", "deathtime", "admission_type",
 core_tables = ["admissions", "patients", "transfers"]
 
 hosp_tables = ["diagnoses_icd", "drgcodes", "emar", "hcpcsevents", "labevents",
-                "microbiologyevents", "pharmacy", "poe", "prescriptions",
-                "procedures_icd", "services"]
+               "microbiologyevents", "pharmacy", "poe", "prescriptions",
+               "procedures_icd", "services"]
 
 icu_tables = ["chartevents", "datetimeevents", "icustays", "inputevents",
-                "outputevents", "procedureevents"]
+              "outputevents", "procedureevents"]
 
-ed_tables = ["diagnosis","edstays","medrecon table","pyxis",
-                "triage","vitalsign","vitalsign_hl7"]
+ed_tables = ["diagnosis", "edstays", "medrecon table", "pyxis",
+             "triage", "vitalsign", "vitalsign_hl7"]
 
-detail_tables = {"hcpcsevents":"d_hcpcs", "diagnosis_icd":"d_icd_diagnosis",
-                "procedures_icd":"d_icd_procedures", "labevents":"d_labitems",
-                "chartevents":"d_items", "datetimeevents":"d_items", "inputevents":"d_items",
-                "outputevents":"d_items", "procedureevents":"d_items", "poe":"poe_detail",
-                "pharmacy":"prescriptions"}
+detail_tables = {"hcpcsevents": "d_hcpcs", "diagnosis_icd": "d_icd_diagnosis",
+                 "procedures_icd": "d_icd_procedures", "labevents": "d_labitems",
+                 "chartevents": "d_items", "datetimeevents": "d_items", "inputevents": "d_items",
+                 "outputevents": "d_items", "procedureevents": "d_items", "poe": "poe_detail",
+                 "pharmacy": "prescriptions"}
 
-detail_foreign_keys = {"d_hcpcs":"code", "d_icd_diagnosis":["icd_code", "icd_version"],
-                       "d_icd_procedures":["icd_code", "icd_version"],
-                       "d_labitems":"itemid", "d_items":"itemid",
-                       "poe_detail":["poe_id", "poe_seq", "subject_id"],
+detail_foreign_keys = {"d_hcpcs": "code", "d_icd_diagnosis": ["icd_code", "icd_version"],
+                       "d_icd_procedures": ["icd_code", "icd_version"],
+                       "d_labitems": "itemid", "d_items": "itemid",
+                       "poe_detail": ["poe_id", "poe_seq", "subject_id"],
                        "prescriptions": "pharmacy_id"}
 
 illicit_tables = ["d_hcpcs", "d_icd_diagnoses", "d_icd_procedures",

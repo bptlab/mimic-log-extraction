@@ -13,7 +13,7 @@ logger = logging.getLogger('cli')
 
 
 def extract_cohort_for_ids(db_cursor, subject_ids, hadm_ids, save_intermediate):
-    """Selects a cohort of patients filteres by provided hospital admission and/or subject ids"""
+    """Selects a cohort of patients filters by provided hospital admission and/or subject ids"""
 
     logger.info("Begin extracting cohort!")
     cohort = extract_admissions(db_cursor)

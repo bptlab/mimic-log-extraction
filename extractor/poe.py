@@ -2,7 +2,7 @@
 import logging
 import pandas as pd
 from .helper import (get_filename_string, extract_poe_for_admission_ids,
-                    extract_table_for_admission_ids)
+                     extract_table_for_admission_ids)
 
 
 logger = logging.getLogger('cli')
@@ -23,18 +23,19 @@ def extract_poe_events(db_cursor, cohort, include_medications, save_intermediate
 
     if include_medications is True:
         pharmacy = extract_table_for_admission_ids(db_cursor, hospital_admission_ids,
-        'mimic_hosp', 'pharmacy')
+                                                   'mimic_hosp', 'pharmacy')
         prescriptions = extract_table_for_admission_ids(db_cursor, hospital_admission_ids,
-        'mimic_hosp', 'prescriptions')
+                                                        'mimic_hosp', 'prescriptions')
         prescriptions = prescriptions[['pharmacy_id', 'drug_type', 'drug', 'gsn', 'ndc',
-        'prod_strength','form_rx', 'dose_val_rx', 'dose_unit_rx', 'form_val_disp',
-        'form_unit_disp']]
-        medications = pharmacy.merge(prescriptions, on=["pharmacy_id"], how="left")
-        medications.drop_duplicates("poe_id", inplace=True) # type: ignore
+                                       'prod_strength', 'form_rx', 'dose_val_rx', 'dose_unit_rx', 'form_val_disp',
+                                       'form_unit_disp']]
+        medications = pharmacy.merge(
+            prescriptions, on=["pharmacy_id"], how="left")
+        medications.drop_duplicates("poe_id", inplace=True)  # type: ignore
         poe_with_medications = poe.merge(medications, on=["poe_id", "subject_id", "hadm_id"],
-                                        how="left")
+                                         how="left")
         poe_with_medications.loc[poe_with_medications["order_type"] == "Medications",
-                                "order_subtype"] = poe_with_medications["medication"]
+                                 "order_subtype"] = poe_with_medications["medication"]
         filename = get_filename_string("poe_with_medications_log", ".csv")
         poe_with_medications.to_csv("output/" + filename)
         logger.info("Done extracting POE events!")
