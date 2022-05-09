@@ -71,6 +71,10 @@ parser.add_argument('--case_attribute_list', type=str, help='Case Attributes')
 parser.add_argument('--config', type=str,
                     help='Config file for providing all options via file')
 
+# Argument to store intermediate dataframes to disk
+parser.add_argument('--save_intermediate', action='store_true')
+parser.add_argument('--ignore_intermediate', dest='save_intermediate', action='store_false')
+parser.set_defaults(save_intermediate=False)
 
 def parse_or_ask_db_settings(input_arguments,
                              config_object: Optional[dict]) -> Tuple[str, str, str, str]:
@@ -250,6 +254,9 @@ procedures, ...): \n""")
 if __name__ == "__main__":
     args = parser.parse_args()
 
+    # TODO: Read from config
+    SAVE_INTERMEDIATE = args.save_intermediate
+
     config: Optional[dict] = None
     if args.config is not None:
         with open(args.config, 'r', encoding='utf-8') as file:
@@ -273,27 +280,27 @@ if __name__ == "__main__":
     # build cohort
     if args.subject_ids is None and args.hadm_ids is None:
         cohort = extract_cohort(db_cursor, cohort_icd_codes, cohort_icd_version,
-        cohort_icd_seq_num, cohort_drg_codes, cohort_drg_type, cohort_age)
+        cohort_icd_seq_num, cohort_drg_codes, cohort_drg_type, cohort_age, SAVE_INTERMEDIATE)
     else:
         cohort = extract_cohort_for_ids(
-            db_cursor, args.subject_ids, args.hadm_ids)
+            db_cursor, args.subject_ids, args.hadm_ids, SAVE_INTERMEDIATE)
 
     if case_attribute_list is not None:
         case_attributes = extract_case_attributes(
-        db_cursor, cohort, determined_case_notion, case_attribute_list)
+        db_cursor, cohort, determined_case_notion, case_attribute_list, SAVE_INTERMEDIATE)
 
     if event_type == "ADMISSION":
-        events = extract_admission_events(db_cursor, cohort)
+        events = extract_admission_events(db_cursor, cohort, SAVE_INTERMEDIATE)
     elif event_type == "TRANSFER":
-        events = extract_transfer_events(db_cursor, cohort)
+        events = extract_transfer_events(db_cursor, cohort, SAVE_INTERMEDIATE)
     elif event_type == "POE":
         include_medications = input("""POE links to medication tables \
 (pharmacy, emar, prescriptions).\nShall the medication events be enhanced by the \
 concrete medications prescribed? (Y/N):""").upper()
         if include_medications == "Y":
-            events = extract_poe_events(db_cursor, cohort, True)
+            events = extract_poe_events(db_cursor, cohort, True, SAVE_INTERMEDIATE)
         else:
-            events = extract_poe_events(db_cursor, cohort, False)
+            events = extract_poe_events(db_cursor, cohort, False, SAVE_INTERMEDIATE)
     elif event_type == "OTHER":
         tables_to_extract = ask_tables()
         if args.tables_activities is not None:
@@ -305,7 +312,7 @@ concrete medications prescribed? (Y/N):""").upper()
         else:
             TABLES_TIMESTAMPS = None
         events = extract_table_events(db_cursor, cohort, tables_to_extract,
-                                      TABLES_ACTIVITIES, TABLES_TIMESTAMPS)
+                                      TABLES_ACTIVITIES, TABLES_TIMESTAMPS, SAVE_INTERMEDIATE)
 
     event_attribute_decision = input("""Shall the event log be enhanced by additional event \
 attributes from other tables in the database? (Y/N):""")
@@ -319,9 +326,9 @@ attributes from other tables in the database? (Y/N):""")
         event_attribute_decision = input("""Shall the event log be enhanced by additional event \
 attributes from other tables in the database? (Y/N):""")
     if event_attribute_decision.upper() == "N":
-
-        csv_filename = get_filename_string("event_attribute_enhanced_log", ".csv")
-        events.to_csv("output/" + csv_filename)
+        if SAVE_INTERMEDIATE:
+            csv_filename = get_filename_string("event_attribute_enhanced_log", ".csv")
+            events.to_csv("output/" + csv_filename)
 
         # set case id key based on determined case notion
         if determined_case_notion == 'SUBJECT':

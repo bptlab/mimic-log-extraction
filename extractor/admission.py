@@ -9,7 +9,7 @@ logger = logging.getLogger('cli')
 # TODO: add type annotations in method signatures
 
 
-def extract_admission_events(db_cursor, cohort) -> pd.DataFrame:
+def extract_admission_events(db_cursor, cohort, save_intermediate) -> pd.DataFrame:
     """
     Extracts transfer events for a given cohort
     """
@@ -44,8 +44,10 @@ def extract_admission_events(db_cursor, cohort) -> pd.DataFrame:
     log = pd.DataFrame.from_dict(event_dict, "index")  # type: ignore
     log = log.sort_values("timestamp")
     log = log.reset_index().drop("index", axis=1)
-    filename = get_filename_string("admission_log", ".csv")
-    log.to_csv("output/" + filename)
+
+    if save_intermediate:
+        filename = get_filename_string("admission_log", ".csv")
+        log.to_csv("output/" + filename)
 
     logger.info("Done extracting admission events!")
 

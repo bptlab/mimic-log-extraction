@@ -9,7 +9,8 @@ logger = logging.getLogger('cli')
 
 # TODO: add type annotations in method signatures
 
-def extract_poe_events(db_cursor, cohort, include_medications) -> pd.DataFrame:
+
+def extract_poe_events(db_cursor, cohort, include_medications, save_intermediate) -> pd.DataFrame:
     """
     Extracts poe events for a given cohort
     """
@@ -39,7 +40,9 @@ def extract_poe_events(db_cursor, cohort, include_medications) -> pd.DataFrame:
         logger.info("Done extracting POE events!")
         return poe_with_medications
 
-    filename = get_filename_string("poe_log", ".csv")
-    poe.to_csv("output/" + filename)
+    if save_intermediate:
+        filename = get_filename_string("poe_log", ".csv")
+        poe.to_csv("output/" + filename)
+
     logger.info("Done extracting POE events!")
     return poe

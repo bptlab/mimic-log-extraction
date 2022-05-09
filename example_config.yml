@@ -3,3 +3,4 @@ db:
     host: 127.0.0.1
     user: some_db_user
     pw: some_db_password
+save_intermediate: True

@@ -11,7 +11,7 @@ logger = logging.getLogger('cli')
 # TODO: add type annotations in method signatures
 
 
-def extract_case_attributes(db_cursor, cohort, case_notion, case_attribute_list) -> pd.DataFrame:
+def extract_case_attributes(db_cursor, cohort, case_notion, case_attribute_list, save_intermediate) -> pd.DataFrame:
     """
     Extracts case attributes for a given cohort
     """
@@ -46,7 +46,9 @@ def extract_case_attributes(db_cursor, cohort, case_notion, case_attribute_list)
         case_attributes = hadm_df[case_attribute_list]
         case_attributes = case_attributes.set_index("hadm_id")
 
-    filename = get_filename_string("case_attributes", ".csv")
-    case_attributes.to_csv("output/" + filename)
+    if save_intermediate:
+        filename = get_filename_string("case_attributes", ".csv")
+        case_attributes.to_csv("output/" + filename)
+
     logger.info("Done extracting case attributes!")
     return case_attributes

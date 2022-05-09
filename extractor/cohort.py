@@ -12,7 +12,7 @@ from .helper import (extract_drgs, extract_icds, filter_icd_df, filter_drg_df, g
 logger = logging.getLogger('cli')
 
 
-def extract_cohort_for_ids(db_cursor, subject_ids, hadm_ids):
+def extract_cohort_for_ids(db_cursor, subject_ids, hadm_ids, save_intermediate):
     """Selects a cohort of patients filteres by provided hospital admission and/or subject ids"""
 
     logger.info("Begin extracting cohort!")
@@ -36,15 +36,17 @@ def extract_cohort_for_ids(db_cursor, subject_ids, hadm_ids):
     cohort.drop(["admittime", "admityear", "anchor_age",
                 "anchor_year"], axis=1, inplace=True)
     cohort = cohort.reset_index().drop("index", axis=1)
-    filename = get_filename_string("cohort_full", ".csv")
-    cohort.to_csv("output/" + filename)
+
+    if save_intermediate:
+        filename = get_filename_string("cohort_full", ".csv")
+        cohort.to_csv("output/" + filename)
 
     logger.info("Done extracting cohort!")
     return cohort
 
 
 def extract_cohort(db_cursor, icd_codes, icd_version, icd_seq_num,
-                   drg_codes, drg_type, ages) -> pd.DataFrame:
+                   drg_codes, drg_type, ages, save_intermediate) -> pd.DataFrame:
     """
     Selects a cohort of patient filtered by age,
     as well as ICD and DRG codes.
@@ -113,8 +115,10 @@ def extract_cohort(db_cursor, icd_codes, icd_version, icd_seq_num,
             drg_cohort, on=["subject_id", "hadm_id"], how="inner")
 
     cohort = cohort.reset_index().drop("index", axis=1)
-    filename = get_filename_string("cohort_full", ".csv")
-    cohort.to_csv("output/" + filename)
+
+    if save_intermediate:
+        filename = get_filename_string("cohort_full", ".csv")
+        cohort.to_csv("output/" + filename)
 
     logger.info("Done extracting cohort!")
 

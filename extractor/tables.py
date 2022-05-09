@@ -13,7 +13,8 @@ logger = logging.getLogger('cli')
 
 def extract_table_events(db_cursor, cohort: pd.DataFrame, table_list: List[str],
                          tables_activities: Optional[List[str]],
-                         tables_timestamps: Optional[List[str]]) -> pd.DataFrame:
+                         tables_timestamps: Optional[List[str]],
+                         save_intermediate: bool) -> pd.DataFrame:
     """
     Extracts events from a given list of tables for a given cohort
     """
@@ -30,8 +31,9 @@ def extract_table_events(db_cursor, cohort: pd.DataFrame, table_list: List[str],
 
     final_log = extract_tables(db_cursor, table_list, hospital_admission_ids, chosen_activity_time)
     final_log = final_log.sort_values(["hadm_id", "time:timestamp"])
-    filename = get_filename_string("table_log", ".csv")
-    final_log.to_csv("output/" + filename)
+    if save_intermediate:
+        filename = get_filename_string("table_log", ".csv")
+        final_log.to_csv("output/" + filename)
 
     logger.info("Done extracting events from provided tables!")
 
