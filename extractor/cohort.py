@@ -12,7 +12,8 @@ from .helper import (extract_drgs, extract_icds, filter_icd_df, filter_drg_df, g
 logger = logging.getLogger('cli')
 
 
-def extract_cohort_for_ids(db_cursor, subject_ids, hadm_ids, save_intermediate):
+def extract_cohort_for_ids(db_cursor, subject_ids, hadm_ids,
+                           save_intermediate: bool) -> pd.DataFrame:
     """Selects a cohort of patients filters by provided hospital admission and/or subject ids"""
 
     logger.info("Begin extracting cohort!")
@@ -46,7 +47,7 @@ def extract_cohort_for_ids(db_cursor, subject_ids, hadm_ids, save_intermediate):
 
 
 def extract_cohort(db_cursor, icd_codes, icd_version, icd_seq_num,
-                   drg_codes, drg_type, ages, save_intermediate) -> pd.DataFrame:
+                   drg_codes, drg_type, ages, save_intermediate: bool) -> pd.DataFrame:
     """
     Selects a cohort of patient filtered by age,
     as well as ICD and DRG codes.

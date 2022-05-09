@@ -3,6 +3,7 @@ Provides functionality for extracting a cohort defined by ICD and DRG codes, as 
 """
 import logging
 import pandas as pd
+from typing import List
 from .helper import (extract_admissions_for_admission_ids, extract_patients, get_filename_string,
                      extract_table_for_admission_ids)
 
@@ -11,7 +12,8 @@ logger = logging.getLogger('cli')
 # TODO: add type annotations in method signatures
 
 
-def extract_case_attributes(db_cursor, cohort, case_notion, case_attribute_list, save_intermediate) -> pd.DataFrame:
+def extract_case_attributes(db_cursor, cohort: pd.DataFrame, case_notion: str,
+                            case_attribute_list: List[str], save_intermediate: bool) -> pd.DataFrame:
     """
     Extracts case attributes for a given cohort
     """

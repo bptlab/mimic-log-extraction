@@ -10,7 +10,8 @@ logger = logging.getLogger('cli')
 # TODO: add type annotations in method signatures
 
 
-def extract_poe_events(db_cursor, cohort, include_medications, save_intermediate) -> pd.DataFrame:
+def extract_poe_events(db_cursor, cohort, include_medications: bool,
+                       save_intermediate: bool) -> pd.DataFrame:
     """
     Extracts poe events for a given cohort
     """
