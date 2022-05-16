@@ -110,92 +110,127 @@ def create_db_connection(name, host, user, password):
     return con
 
 
-def ask_cohorts() -> Tuple[Optional[List[str]], Optional[int], Optional[int],
-                           Optional[List[str]], Optional[str], Optional[List[str]]]:
+def ask_cohorts(config_object: Optional[dict]) -> Tuple[Optional[List[str]], Optional[int],
+                                                        Optional[int], Optional[List[str]],
+                                                        Optional[str], Optional[List[str]]]:
     """Ask for patient cohort filters"""
     logger.info("Determining patient cohort...")
 
-    icd_string = args.icd if args.icd is not None else str(
-        input("Enter ICD code(s) seperated by comma (Press enter to choose all):\n"))
-    icd_codes = icd_string.split(',')
-    icd_codes = None if icd_codes == [''] else icd_codes
-
-    if icd_codes is None:
-        icd_version = None
-        icd_seq_num = None
+    if config_object is not None and config_object["icd_codes"] is not None:
+        icd_codes = config_object['icd_codes']
+        icd_codes = None if icd_codes == [''] else icd_codes
+        icd_version = config_object["icd_version"]
+        icd_seq_num = config_object["icd_seq_num"]
     else:
-        icd_version = args.icd_version if args.icd_version is not None else int(
-            input("Enter ICD version (9, 10, 0 for both):\n"))
-        icd_seq_num = args.icd_sequence_number if args.icd_sequence_number is not None else int(
-            input("Enter considered ranking threshold of diagnosis (1 is the highest priority):\n"))
+        icd_string = args.icd if args.icd is not None else str(
+            input("Enter ICD code(s) seperated by comma (Press enter to choose all):\n"))
+        icd_codes = icd_string.split(',')
+        icd_codes = None if icd_codes == [''] else icd_codes
 
-    drg_string = args.drg if args.drg is not None else str(
-        input("Enter DRG code(s) seperated by comma (Press enter to choose all):\n"))
-    drg_codes = drg_string.split(',')
-    drg_codes = None if drg_codes == [''] else drg_codes
+        if icd_codes is None:
+            icd_version = None
+            icd_seq_num = None
+        else:
+            icd_version = args.icd_version if args.icd_version is not None else int(
+                input("Enter ICD version (9, 10, 0 for both):\n"))
+            icd_seq_num = args.icd_sequence_number if args.icd_sequence_number is not None else int(
+                input("Enter considered ranking threshold of \
+                        diagnosis (1 is the highest priority):\n"))
 
-    if drg_codes is None:
-        drg_type = None
+    if config_object is not None and config_object["drg_codes"] is not None:
+        drg_codes = config_object['drg_codes']
+        drg_codes = None if drg_codes == [''] else drg_codes
+        drg_type = config_object["drg_ontology"]
     else:
-        drg_type = args.drg_type if args.drg_type is not None else str(
-            input("Enter DRG ontology (HCFA, APR):\n"))
+        drg_string = args.drg if args.drg is not None else str(
+            input("Enter DRG code(s) seperated by comma (Press enter to choose all):\n"))
+        drg_codes = drg_string.split(',')
+        drg_codes = None if drg_codes == [''] else drg_codes
 
-    age_string = args.age if args.age is not None else str(
-        input("Enter Patient Age ranges seperated by comma, e.g. 0:20,50:90:\n"))
-    ages = age_string.split(',')
-    ages = None if ages == [''] else ages
+        if drg_codes is None:
+            drg_type = None
+        else:
+            drg_type = args.drg_type if args.drg_type is not None else str(
+                input("Enter DRG ontology (HCFA, APR):\n"))
+
+    if config_object is not None and config_object["age"] is not None:
+        ages = config_object['age']
+    else:
+        age_string = args.age if args.age is not None else str(
+            input("Enter Patient Age ranges seperated by comma, e.g. 0:20,50:90:\n"))
+        ages = age_string.split(',')
+        ages = None if ages == [''] else ages
 
     return icd_codes, icd_version, icd_seq_num, drg_codes, drg_type, ages
 
 
-def ask_case_notion() -> str:
+def ask_case_notion(config_object: Optional[dict]) -> str:
     """Ask for case notion: Subject_Id or Hospital_Admission_Id"""
     # TODO: use ADT to encode case notion
     implemented_case_notions = ['SUBJECT', 'HOSPITAL ADMISSION']
 
-    type_string = args.notion if args.notion is not None else str(
-        input("Choose Case Notion: Subject, Hospital Admission ?\n"))
+    if config_object is not None and config_object["case_notion"] is not None:
+        case_string = config_object['case_notion']
+    else:
+        case_string = args.notion if args.notion is not None else str(
+            input("Choose Case Notion: Subject, Hospital Admission ?\n"))
 
-    if type_string.upper() not in implemented_case_notions:
+    if case_string.upper() not in implemented_case_notions:
         logger.error("The input provided was not in %s",
                      implemented_case_notions)
         sys.exit("No valid case notion provided.")
-    return type_string.upper()
+    return case_string.upper()
 
 
-def ask_case_attributes(case_notion) -> Optional[List[str]]:
+def ask_case_attributes(case_notion, config_object) -> Optional[List[str]]:
     """Ask for case attributes"""
     logger.info("Determining case attributes...")
     logger.info("The following case notion was selected: %s", case_notion)
-    case_attribute_decision = input(
-        "Do you want to skip case attribute extraction? (Y/N):").upper()
-    if case_attribute_decision == "N":
-        logger.info("Available case attributes:")
-        if case_notion == "SUBJECT":
-            logger.info('[%s]' % ', '.join(map(str, subject_case_attributes)))
-        elif case_notion == "HOSPITAL ADMISSION":
-            logger.info('[%s]' % ', '.join(map(str, hadm_case_attributes)))
-        attribute_string = args.case_attribute_list if args.case_attribute_list is not None \
-            else str(
-                input("Enter case attributes seperated by comma (Press enter to choose all):\n"))
-        attribute_list = attribute_string.split(',')
+
+    if config_object is not None and config_object["case_attributes"] is not None:
+        attribute_list = config_object['case_attributes']
         if attribute_list == ['']:
             if case_notion == "SUBJECT":
                 attribute_list = subject_case_attributes
             elif case_notion == "HOSPITAL ADMISSION":
                 attribute_list = hadm_case_attributes
-    else:
+    elif config_object is not None and config_object['case_attributes'] is None:
         attribute_list = None
+    else:
+        case_attribute_decision = input(
+            "Do you want to skip case attribute extraction? (Y/N):").upper()
+        if case_attribute_decision == "N":
+            logger.info("Available case attributes:")
+            if case_notion == "SUBJECT":
+                logger.info('[%s]' % ', '.join(
+                    map(str, subject_case_attributes)))
+            elif case_notion == "HOSPITAL ADMISSION":
+                logger.info('[%s]' % ', '.join(map(str, hadm_case_attributes)))
+            attribute_string = args.case_attribute_list if args.case_attribute_list is not None \
+                else str(
+                    input("Enter case attributes seperated by \
+                            comma (Press enter to choose all):\n"))
+            attribute_list = attribute_string.split(',')
+            if attribute_list == ['']:
+                if case_notion == "SUBJECT":
+                    attribute_list = subject_case_attributes
+                elif case_notion == "HOSPITAL ADMISSION":
+                    attribute_list = hadm_case_attributes
+        else:
+            attribute_list = None
 
     return attribute_list
 
 
-def ask_event_type():
+def ask_event_type(config_object: Optional[dict]):
     """Ask for event types: Admission, Transfer, ...?"""
     implemented_event_types = ['ADMISSION', 'TRANSFER', 'POE', 'OTHER']
 
-    type_string = args.type if args.type is not None else str(
-        input("Choose Event Type: Admission, Transfer, POE, ?\n"))
+    if config_object is not None and config_object["event_type"] is not None:
+        type_string = config_object['event_type']
+    else:
+        type_string = args.type if args.type is not None else str(
+            input("Choose Event Type: Admission, Transfer, POE, ?\n"))
 
     if type_string.upper() not in implemented_event_types:
         logger.error("The input provided was not in %s",
@@ -266,13 +301,15 @@ procedures, ...): \n""")
 if __name__ == "__main__":
     args = parser.parse_args()
 
-    # TODO: Read from config
-    SAVE_INTERMEDIATE = args.save_intermediate
-
     config: Optional[dict] = None
     if args.config is not None:
         with open(args.config, 'r', encoding='utf-8') as file:
             config = yaml.safe_load(file)
+
+    if config is not None and config["save_intermediate"] is not None:
+        SAVE_INTERMEDIATE = config['save_intermediate']
+    else:
+        SAVE_INTERMEDIATE = False
 
     db_name, db_host, db_user, db_pw = parse_or_ask_db_settings(
         args, config_object=config)
@@ -281,13 +318,13 @@ if __name__ == "__main__":
 
     if args.subject_ids is None and args.hadm_ids is None:
         cohort_icd_codes, cohort_icd_version, cohort_icd_seq_num, cohort_drg_codes, \
-            cohort_drg_type, cohort_age = ask_cohorts()
+            cohort_drg_type, cohort_age = ask_cohorts(config_object=config)
 
-    determined_case_notion = ask_case_notion()
+    determined_case_notion = ask_case_notion(config_object=config)
 
-    case_attribute_list = ask_case_attributes(determined_case_notion)
+    case_attribute_list = ask_case_attributes(determined_case_notion, config)
 
-    event_type = ask_event_type()
+    event_type = ask_event_type(config_object=config)
 
     # build cohort
     if args.subject_ids is None and args.hadm_ids is None:
@@ -307,15 +344,16 @@ if __name__ == "__main__":
     elif event_type == "TRANSFER":
         events = extract_transfer_events(db_cursor, cohort, SAVE_INTERMEDIATE)
     elif event_type == "POE":
-        include_medications = input("""POE links to medication tables \
-(pharmacy, emar, prescriptions).\nShall the medication events be enhanced by the \
-concrete medications prescribed? (Y/N):""").upper()
-        if include_medications == "Y":
-            events = extract_poe_events(
-                db_cursor, cohort, True, SAVE_INTERMEDIATE)
+        if config is not None and config["include_medications"] is not None:
+            SHOULD_INCLUDE_MEDICATIONS: bool = config['include_medications']
         else:
-            events = extract_poe_events(
-                db_cursor, cohort, False, SAVE_INTERMEDIATE)
+            include_medications = input("""POE links to medication tables \
+    (pharmacy, emar, prescriptions).\nShall the medication events be enhanced by the \
+    concrete medications prescribed? (Y/N):""").upper()
+            SHOULD_INCLUDE_MEDICATIONS = include_medications == "Y"
+
+        events = extract_poe_events(
+            db_cursor, cohort, SHOULD_INCLUDE_MEDICATIONS, SAVE_INTERMEDIATE)
     elif event_type == "OTHER":
         tables_to_extract = ask_tables()
         if args.tables_activities is not None:
@@ -329,6 +367,7 @@ concrete medications prescribed? (Y/N):""").upper()
         events = extract_table_events(db_cursor, cohort, tables_to_extract,
                                       TABLES_ACTIVITIES, TABLES_TIMESTAMPS, SAVE_INTERMEDIATE)
 
+    # TODO: add this to config
     event_attribute_decision = input("""Shall the event log be enhanced by additional event \
 attributes from other tables in the database? (Y/N):""")
 

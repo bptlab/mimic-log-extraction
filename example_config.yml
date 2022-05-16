@@ -4,3 +4,18 @@ db:
     user: some_db_user
     pw: some_db_password
 save_intermediate: True
+event_type: admission
+include_medications: False # only if POE type
+case_notion: hostpital admission
+case_attributes: [] # could be None, too
+cohort:
+    icd_codes: # could also be []
+        - M54.5
+        - M54.0
+    icd_version: 10
+    icd_seq_num: 1
+    drg_codes: [] # could also be a list
+    drg_ontology: APR
+    age:
+        - 0:25
+        - 50:90
