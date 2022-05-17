@@ -347,9 +347,9 @@ if __name__ == "__main__":
         if config is not None and config["include_medications"] is not None:
             SHOULD_INCLUDE_MEDICATIONS: bool = config['include_medications']
         else:
-            include_medications = input("""POE links to medication tables \
-    (pharmacy, emar, prescriptions).\nShall the medication events be enhanced by the \
-    concrete medications prescribed? (Y/N):""").upper()
+            include_medications = input("""POE links to medication tables
+(pharmacy, emar, prescriptions).\n Shall the medication events be enhanced by the 
+concrete medications prescribed? (Y/N):""").upper()
             SHOULD_INCLUDE_MEDICATIONS = include_medications == "Y"
 
         events = extract_poe_events(
@@ -368,7 +368,7 @@ if __name__ == "__main__":
                                       TABLES_ACTIVITIES, TABLES_TIMESTAMPS, SAVE_INTERMEDIATE)
 
     # TODO: add this to config
-    event_attribute_decision = input("""Shall the event log be enhanced by additional event \
+    event_attribute_decision = input("""Shall the event log be enhanced by additional event
 attributes from other tables in the database? (Y/N):""")
 
     while event_attribute_decision.upper() == "Y":
@@ -378,7 +378,7 @@ attributes from other tables in the database? (Y/N):""")
         events = extract_event_attributes(db_cursor, events, start_column, end_column,
                                           time_column, table_to_aggregate, column_to_aggregate,
                                           aggregation_method, filter_column, filter_values)
-        event_attribute_decision = input("""Shall the event log be enhanced by additional event \
+        event_attribute_decision = input("""Shall the event log be enhanced by additional event
 attributes from other tables in the database? (Y/N):""")
     if event_attribute_decision.upper() == "N":
         if SAVE_INTERMEDIATE:
@@ -414,5 +414,5 @@ attributes from other tables in the database? (Y/N):""")
                       .Parameters.CASE_ATTRIBUTE_PREFIX: 'case:'}
         event_log_object = log_converter.apply(
             events, parameters=parameters, variant=log_converter.Variants.TO_EVENT_LOG)
-        filename = get_filename_string("event_attribute_enhanced_log", ".xes")
+        filename = get_filename_string("event_log", ".xes")
         xes_exporter.apply(event_log_object, "output/" + filename)

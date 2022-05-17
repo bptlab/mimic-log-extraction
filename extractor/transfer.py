@@ -29,6 +29,7 @@ def extract_transfer_events(db_cursor, cohort, save_intermediate: bool) -> pd.Da
 
     transfers = transfers.reset_index().drop("index", axis=1)
 
+    transfers = transfers.rename({"careunit":"concept:name", "intime":"time:timestamp"}, axis=1)
     if save_intermediate:
         filename = get_filename_string("transfer_log", ".csv")
         transfers.to_csv("output/" + filename)
