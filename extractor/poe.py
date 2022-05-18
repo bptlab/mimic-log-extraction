@@ -1,9 +1,8 @@
 """Provides functionality to generate POE event logs for a given cohort"""
 import logging
 import pandas as pd
-from .helper import (extract_table_for_subject_ids, get_filename_string, 
-                    extract_poe_for_admission_ids, extract_table_for_admission_ids, 
-                    extract_table, extract_table_for_subject_ids)
+from .helper import (extract_table_for_subject_ids, get_filename_string,
+                    extract_poe_for_admission_ids, extract_table_for_admission_ids)
 
 
 logger = logging.getLogger('cli')
