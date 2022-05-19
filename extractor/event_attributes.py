@@ -1,5 +1,6 @@
 """Provides functionality to enhance event logs with event attributes"""
 import logging
+from typing import List, Optional
 import warnings
 import pandas as pd
 from psycopg2.extensions import cursor
@@ -10,13 +11,12 @@ warnings.filterwarnings("ignore")
 
 logger = logging.getLogger('cli')
 
-# TODO: add type annotations in method signatures
 
-
-def extract_event_attributes(db_cursor: cursor, log: pd.DataFrame, start_column,
-                             end_column, time_column,
-                             table_to_aggregate, column_to_aggregate,
-                             aggregation_method, filter_column, filter_values) -> pd.DataFrame:
+def extract_event_attributes(db_cursor: cursor, log: pd.DataFrame, start_column: str,
+                             end_column: str, time_column: str,
+                             table_to_aggregate: str, column_to_aggregate: List[str],
+                             aggregation_method: str, filter_column: Optional[str],
+                             filter_values: Optional[List[str]]) -> pd.DataFrame:
     """
     Extracts event attributes for a given event log
     """
@@ -40,10 +40,10 @@ def extract_event_attributes(db_cursor: cursor, log: pd.DataFrame, start_column,
 
     if filter_column is not None:
         aggregated_df = joined_df.groupby([case_notion, filter_column, start_column, end_column])\
-            .agg(aggregation_dict).reset_index()
+            .agg(aggregation_dict).reset_index()  # type: ignore
     else:
         aggregated_df = joined_df.groupby([case_notion, start_column, end_column])\
-            .agg(aggregation_dict).reset_index()
+            .agg(aggregation_dict).reset_index()  # type: ignore
 
     aggregated_df[start_column] = aggregated_df[start_column].apply(
         pd.to_datetime)
@@ -51,11 +51,11 @@ def extract_event_attributes(db_cursor: cursor, log: pd.DataFrame, start_column,
     log[start_column] = log[start_column].apply(pd.to_datetime)
     log[end_column] = log[end_column].apply(pd.to_datetime)
 
-    if filter_column is not None:
+    if filter_column is not None and filter_values is not None:
         for filter_val in filter_values:
             filter_val_df = aggregated_df.loc[aggregated_df[filter_column] == filter_val]
             for col in column_to_aggregate:
-                filter_val_df.rename({column_to_aggregate: filter_val + "_" + column_to_aggregate},
+                filter_val_df.rename({col: filter_val + "_" + col},
                                      axis=1, inplace=True)
             filter_val_df.drop(filter_column, axis=1, inplace=True)
             log = log.merge(filter_val_df, on=[
