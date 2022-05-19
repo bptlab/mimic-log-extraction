@@ -1,6 +1,7 @@
 """Provides functionality to generate POE event logs for a given cohort"""
 import logging
 import pandas as pd
+from psycopg2.extensions import cursor
 from .extraction_helper import (extract_table_for_subject_ids, get_filename_string,
                                 extract_poe_for_admission_ids,
                                 extract_table_for_admission_ids)
@@ -11,7 +12,7 @@ logger = logging.getLogger('cli')
 # TODO: add type annotations in method signatures
 
 
-def extract_poe_events(db_cursor, cohort, include_medications: bool,
+def extract_poe_events(db_cursor: cursor, cohort: pd.DataFrame, include_medications: bool,
                        save_intermediate: bool) -> pd.DataFrame:
     """
     Extracts poe events for a given cohort

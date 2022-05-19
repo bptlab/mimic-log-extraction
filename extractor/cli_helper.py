@@ -3,11 +3,15 @@ Provides methods for handling user input and parameter parsing
 """
 
 
+from argparse import Namespace
 import logging
 import sys
 from typing import List, Optional, Tuple
 
+import pandas as pd
+
 from psycopg2 import connect
+from psycopg2.extensions import connection, cursor
 
 from extractor.constants import ADMISSION_CASE_NOTION, ADMISSION_EVENT_TYPE,\
     OTHER_EVENT_TYPE, POE_EVENT_TYPE, SUBJECT_CASE_NOTION, TRANSFER_EVENT_TYPE
@@ -18,7 +22,7 @@ from extractor.extraction_helper import (subject_case_attributes, hadm_case_attr
 logger = logging.getLogger('cli')
 
 
-def parse_or_ask_db_settings(args,
+def parse_or_ask_db_settings(args: Namespace,
                              config_object: Optional[dict]) -> Tuple[str, str, str, str]:
     """Parse database config or use flags/ask for input"""
     logger.info("Determining and establishing database connection...")
@@ -41,14 +45,14 @@ def parse_or_ask_db_settings(args,
     return input_db_name, input_db_host, input_db_user, input_db_password
 
 
-def create_db_connection(name, host, user, password):
+def create_db_connection(name: str, host: str, user: str, password: str) -> connection:
     """Create database connection with supplied parameters"""
     con = connect(dbname=name, host=host, user=user, password=password)
     con.set_client_encoding('utf8')
     return con
 
 
-def parse_or_ask_cohorts(args, config_object: Optional[dict]) -> Tuple[
+def parse_or_ask_cohorts(args: Namespace, config_object: Optional[dict]) -> Tuple[
         Optional[List[str]], Optional[int],
         Optional[int], Optional[List[str]],
         Optional[str],
@@ -104,7 +108,7 @@ def parse_or_ask_cohorts(args, config_object: Optional[dict]) -> Tuple[
     return icd_codes, icd_version, icd_seq_num, drg_codes, drg_type, ages
 
 
-def parse_or_ask_case_notion(args, config_object: Optional[dict]) -> str:
+def parse_or_ask_case_notion(args: Namespace, config_object: Optional[dict]) -> str:
     """Ask for case notion: Subject_Id or Hospital_Admission_Id"""
     # TODO: use ADT to encode case notion
     logger.info("Determining case notion...")
@@ -123,7 +127,8 @@ def parse_or_ask_case_notion(args, config_object: Optional[dict]) -> str:
     return case_string.upper()
 
 
-def parse_or_ask_case_attributes(args, case_notion, config_object) -> Optional[List[str]]:
+def parse_or_ask_case_attributes(args: Namespace, case_notion: str,
+                                 config_object: Optional[dict]) -> Optional[List[str]]:
     """Ask for case attributes"""
     logger.info("Determining case attributes...")
     logger.info("The following case notion was selected: %s", case_notion)
@@ -163,7 +168,7 @@ def parse_or_ask_case_attributes(args, case_notion, config_object) -> Optional[L
     return attribute_list
 
 
-def parse_or_ask_event_type(args, config_object: Optional[dict]):
+def parse_or_ask_event_type(args: Namespace, config_object: Optional[dict]) -> str:
     """Ask for event types: Admission, Transfer, ...?"""
     logger.info("Determining event type...")
     implemented_event_types = [ADMISSION_EVENT_TYPE, TRANSFER_EVENT_TYPE,
@@ -182,7 +187,7 @@ def parse_or_ask_event_type(args, config_object: Optional[dict]):
     return type_string.upper()
 
 
-def parse_or_ask_low_level_tables(args, config_object: Optional[dict]):
+def parse_or_ask_low_level_tables(args: Namespace, config_object: Optional[dict]) -> List[str]:
     """Ask for low level tables: Chartevents, Procedureevents, Labevents, ...?"""
     logger.info("Determining low level tables...")
     if config_object is not None and config_object["low_level_tables"] is not None:
@@ -200,8 +205,9 @@ def parse_or_ask_low_level_tables(args, config_object: Optional[dict]):
     return table_list
 
 
-def ask_event_attributes(db_cursor, event_log) -> Tuple[str, str, str, str, List[str],
-                                                        str, Optional[str], Optional[List[str]]]:
+def ask_event_attributes(db_cursor: cursor, event_log: pd.DataFrame) -> Tuple[
+        str, str, str, str, List[str],
+        str, Optional[str], Optional[List[str]]]:
     """Ask for event attributes"""
     logger.info("Determining event attributes...")
     table_columns = list(event_log.columns)

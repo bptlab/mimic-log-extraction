@@ -2,6 +2,7 @@
 import logging
 import warnings
 import pandas as pd
+from psycopg2.extensions import cursor
 from .extraction_helper import (join_event_attributes_with_log_events)
 from .tables import (extract_tables)
 
@@ -12,7 +13,8 @@ logger = logging.getLogger('cli')
 # TODO: add type annotations in method signatures
 
 
-def extract_event_attributes(db_cursor, log, start_column, end_column, time_column,
+def extract_event_attributes(db_cursor: cursor, log: pd.DataFrame, start_column,
+                             end_column, time_column,
                              table_to_aggregate, column_to_aggregate,
                              aggregation_method, filter_column, filter_values) -> pd.DataFrame:
     """

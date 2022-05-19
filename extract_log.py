@@ -38,7 +38,6 @@ parser = argparse.ArgumentParser(
     description='A CLI tool for extracting event logs out of MIMIC Databases.')
 
 # TODO: sanity check argument inputs before using later on!
-# TODO: add all question-answer style parameters to config object
 
 # Database Parameters
 parser.add_argument('--db_name', type=str, help='Database Name')
@@ -98,25 +97,22 @@ if __name__ == "__main__":
         SAVE_INTERMEDIATE = args.save_intermediate
 
     # Create database connection
-    db_name, db_host, db_user, db_pw = parse_or_ask_db_settings(
-        args, config_object=config)
+    db_name, db_host, db_user, db_pw = parse_or_ask_db_settings(args, config)
     db_connection = create_db_connection(db_name, db_host, db_user, db_pw)
     db_cursor = db_connection.cursor()
 
     # Determine Cohort
     if args.subject_ids is None and args.hadm_ids is None:
         cohort_icd_codes, cohort_icd_version, cohort_icd_seq_num, cohort_drg_codes, \
-            cohort_drg_type, cohort_age = parse_or_ask_cohorts(args,
-                                                               config_object=config)
+            cohort_drg_type, cohort_age = parse_or_ask_cohorts(args, config)
     # Determine case notion
-    determined_case_notion = parse_or_ask_case_notion(
-        args, config_object=config)
+    determined_case_notion = parse_or_ask_case_notion(args, config)
 
     # Determine case attributes
     case_attribute_list = parse_or_ask_case_attributes(args,
                                                        determined_case_notion, config)
 
-    event_type = parse_or_ask_event_type(args, config_object=config)
+    event_type = parse_or_ask_event_type(args, config)
 
     # build cohort
     if args.subject_ids is None and args.hadm_ids is None:
@@ -158,8 +154,6 @@ if __name__ == "__main__":
         events = extract_table_events(db_cursor, cohort, tables_to_extract,
                                       TABLES_ACTIVITIES, TABLES_TIMESTAMPS, SAVE_INTERMEDIATE)
 
-    # TODO: add this to config
-
     if config is not None and config["additional_event_attributes"] is not None:
         additional_attributes: List[dict] = config['additional_event_attributes']
         for attribute in additional_attributes:
@@ -174,7 +168,7 @@ if __name__ == "__main__":
         event_attribute_decision = input(ADDITIONAL_ATTRIBUTES_QUESTION)
         while event_attribute_decision.upper() == "Y":
             start_column, end_column, time_column, table_to_aggregate, column_to_aggregate,\
-                aggregation_method, filter_column, filter_values = ask_event_attributes(args,
+                aggregation_method, filter_column, filter_values = ask_event_attributes(db_cursor,
                                                                                         events)
             events = extract_event_attributes(db_cursor, events, start_column, end_column,
                                               time_column, table_to_aggregate, column_to_aggregate,

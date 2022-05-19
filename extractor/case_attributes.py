@@ -4,6 +4,7 @@ Provides functionality for extracting a cohort defined by ICD and DRG codes, as 
 import logging
 from typing import List
 import pandas as pd
+from psycopg2.extensions import cursor
 
 from extractor.constants import ADMISSION_CASE_NOTION, SUBJECT_CASE_NOTION
 from .extraction_helper import (extract_admissions_for_admission_ids, extract_patients,
@@ -11,10 +12,8 @@ from .extraction_helper import (extract_admissions_for_admission_ids, extract_pa
 
 logger = logging.getLogger('cli')
 
-# TODO: add type annotations in method signatures
 
-
-def extract_case_attributes(db_cursor, cohort: pd.DataFrame, case_notion: str,
+def extract_case_attributes(db_cursor: cursor, cohort: pd.DataFrame, case_notion: str,
                             case_attribute_list: List[str],
                             save_intermediate: bool) -> pd.DataFrame:
     """

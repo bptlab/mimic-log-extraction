@@ -1,16 +1,15 @@
 """Provides functionality to generate admission event logs for a given cohort"""
 import logging
 import pandas as pd
+from psycopg2.extensions import cursor
 from .extraction_helper import (
     get_filename_string, extract_admissions_for_admission_ids)
 
 
 logger = logging.getLogger('cli')
 
-# TODO: add type annotations in method signatures
 
-
-def extract_admission_events(db_cursor, cohort: pd.DataFrame,
+def extract_admission_events(db_cursor: cursor, cohort: pd.DataFrame,
                              save_intermediate: bool) -> pd.DataFrame:
     """
     Extracts transfer events for a given cohort

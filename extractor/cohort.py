@@ -2,30 +2,30 @@
 Provides functionality for extracting a cohort defined by ICD and DRG codes, as well as patient ages
 """
 import logging
+from typing import List, Optional
 import pandas as pd
+from psycopg2.extensions import cursor
 from .extraction_helper import (extract_drgs, extract_icds, filter_icd_df,
                                 filter_drg_df, get_filename_string,
                                 extract_admissions, extract_patients, filter_age_ranges)
 
 
-# TODO: add type annotations in method signatures
-
 logger = logging.getLogger('cli')
 
 
-def extract_cohort_for_ids(db_cursor, subject_ids, hadm_ids,
+def extract_cohort_for_ids(db_cursor: cursor, subjects: Optional[str], admissions: Optional[str],
                            save_intermediate: bool) -> pd.DataFrame:
     """Selects a cohort of patients filters by provided hospital admission and/or subject ids"""
 
     logger.info("Begin extracting cohort!")
     cohort = extract_admissions(db_cursor)
-    if hadm_ids is not None:
-        hadm_ids = hadm_ids.split(',')
-        hadm_ids = [int(hadm_id) for hadm_id in hadm_ids]
+    if admissions is not None:
+        admissions_list = admissions.split(',')
+        hadm_ids = [int(hadm_id) for hadm_id in admissions_list]
         cohort = cohort.loc[cohort["hadm_id"].isin(hadm_ids)]
-    if subject_ids is not None:
-        subject_ids = subject_ids.split(',')
-        subject_ids = [int(subject_id) for subject_id in subject_ids]
+    if subjects is not None:
+        subject_list = subjects.split(',')
+        subject_ids = [int(subject_id) for subject_id in subject_list]
         cohort = cohort.loc[cohort["subject_id"].isin(subject_ids)]
 
     cohort = cohort[["subject_id", "hadm_id", "admittime"]]
@@ -47,12 +47,13 @@ def extract_cohort_for_ids(db_cursor, subject_ids, hadm_ids,
     return cohort
 
 
-def extract_cohort(db_cursor, icd_codes, icd_version, icd_seq_num,
-                   drg_codes, drg_type, ages, save_intermediate: bool) -> pd.DataFrame:
+def extract_cohort(db_cursor: cursor, icd_codes: Optional[List[str]], icd_version: Optional[int],
+                   icd_seq_num: Optional[int], drg_codes: Optional[List[str]],
+                   drg_type: Optional[str], ages: Optional[List[str]],
+                   save_intermediate: bool) -> pd.DataFrame:
     """
     Selects a cohort of patient filtered by age,
     as well as ICD and DRG codes.
-    TODO: ignores age filter so far
     """
 
     logger.info("Begin extracting cohort!")
@@ -94,7 +95,7 @@ def extract_cohort(db_cursor, icd_codes, icd_version, icd_seq_num,
     icds = extract_icds(db_cursor)
 
     # Filter for relevant ICD codes
-    if icd_codes is not None:
+    if icd_codes is not None and icd_version is not None and icd_seq_num is not None:
         icd_cohort = filter_icd_df(icds=icds, icd_filter_list=icd_filter_list,
                                    icd_version=icd_version)
         icd_cohort = icd_cohort.loc[icd_cohort["seq_num"] <= icd_seq_num]
@@ -108,7 +109,7 @@ def extract_cohort(db_cursor, icd_codes, icd_version, icd_seq_num,
         cohort = cohort.merge(icd_cohort, on="hadm_id", how="inner")
 
     # Filter for relevant DRG codes
-    if drg_codes is not None:
+    if drg_codes is not None and drg_type is not None:
         drgs = drgs.loc[drgs["drg_type"] == drg_type]
         drg_cohort = filter_drg_df(drgs, drg_filter_list)
         cohort = cohort.loc[cohort["hadm_id"].isin(

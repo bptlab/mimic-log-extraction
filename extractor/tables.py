@@ -2,6 +2,7 @@
 import logging
 from typing import List, Optional
 import pandas as pd
+from psycopg2.extensions import cursor
 from .extraction_helper import (extract_table_columns, get_filename_string,
                                 extract_table_for_admission_ids, extract_table,
                                 extract_emergency_department_stays_for_admission_ids,
@@ -12,7 +13,7 @@ from .extraction_helper import (extract_table_columns, get_filename_string,
 logger = logging.getLogger('cli')
 
 
-def extract_table_events(db_cursor, cohort: pd.DataFrame, table_list: List[str],
+def extract_table_events(db_cursor: cursor, cohort: pd.DataFrame, table_list: List[str],
                          tables_activities: Optional[List[str]],
                          tables_timestamps: Optional[List[str]],
                          save_intermediate: bool) -> pd.DataFrame:
@@ -43,7 +44,8 @@ def extract_table_events(db_cursor, cohort: pd.DataFrame, table_list: List[str],
     return final_log
 
 
-def ask_activity_and_time(db_cursor, table_list: List[str], tables_activities: Optional[List[str]],
+def ask_activity_and_time(db_cursor: cursor, table_list: List[str],
+                          tables_activities: Optional[List[str]],
                           tables_timestamps: Optional[List[str]]) -> dict:
     """
     Derives columns from tables and asks for activity and timestamp column
@@ -93,7 +95,7 @@ def ask_activity_and_time(db_cursor, table_list: List[str], tables_activities: O
     return chosen_activity_time
 
 
-def extract_tables(db_cursor, table_list: List[str], hospital_admission_ids: List[float],
+def extract_tables(db_cursor: cursor, table_list: List[str], hospital_admission_ids: List[float],
                    chosen_activity_time: Optional[dict]) -> pd.DataFrame:
     """
     Extracts given tables from the database and generates an event log
