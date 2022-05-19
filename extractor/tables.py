@@ -2,10 +2,11 @@
 import logging
 from typing import List, Optional
 import pandas as pd
-from .helper import (extract_table_columns, get_filename_string, extract_table_for_admission_ids,
-                     extract_table, extract_emergency_department_stays_for_admission_ids,
-                     extract_ed_table_for_ed_stays, get_table_module, detail_tables,
-                     detail_foreign_keys)
+from .extraction_helper import (extract_table_columns, get_filename_string,
+                                extract_table_for_admission_ids, extract_table,
+                                extract_emergency_department_stays_for_admission_ids,
+                                extract_ed_table_for_ed_stays, get_table_module, detail_tables,
+                                detail_foreign_keys)
 
 
 logger = logging.getLogger('cli')
@@ -67,12 +68,12 @@ def ask_activity_and_time(db_cursor, table_list: List[str], tables_activities: O
 
             time_columns = list(
                 filter(lambda col: "time" in col or "date" in col, table_columns))
-            ativity_columns = list(filter(lambda col: "time" not in col and "date" not in col
-                                          and "id" not in col, table_columns))
+            activity_columns = list(filter(lambda col: "time" not in col and "date" not in col
+                                           and "id" not in col, table_columns))
 
             logger.info(
                 "The table %s includes the following activity columns: ", table)
-            logger.info('[%s]' % ', '.join(map(str, ativity_columns)))
+            logger.info('[%s]' % ', '.join(map(str, activity_columns)))
             chosen_activity_column = input("Choose the activity column:")
 
             if len(time_columns) == 1:

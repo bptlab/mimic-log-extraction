@@ -3,8 +3,9 @@ Provides functionality for extracting a cohort defined by ICD and DRG codes, as 
 """
 import logging
 import pandas as pd
-from .helper import (extract_drgs, extract_icds, filter_icd_df, filter_drg_df, get_filename_string,
-                     extract_admissions, extract_patients, filter_age_ranges)
+from .extraction_helper import (extract_drgs, extract_icds, filter_icd_df,
+                                filter_drg_df, get_filename_string,
+                                extract_admissions, extract_patients, filter_age_ranges)
 
 
 # TODO: add type annotations in method signatures
@@ -106,7 +107,7 @@ def extract_cohort(db_cursor, icd_codes, icd_version, icd_seq_num,
             list(icd_cohort["hadm_id"]))]
         cohort = cohort.merge(icd_cohort, on="hadm_id", how="inner")
 
-    # Filter for relevnt DRG codes
+    # Filter for relevant DRG codes
     if drg_codes is not None:
         drgs = drgs.loc[drgs["drg_type"] == drg_type]
         drg_cohort = filter_drg_df(drgs, drg_filter_list)

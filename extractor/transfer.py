@@ -1,7 +1,8 @@
 """Provides functionality to generate transfer event logs for a given cohort"""
 import logging
 import pandas as pd
-from .helper import (get_filename_string, extract_transfers_for_admission_ids)
+from .extraction_helper import (
+    get_filename_string, extract_transfers_for_admission_ids)
 
 
 logger = logging.getLogger('cli')
@@ -29,7 +30,8 @@ def extract_transfer_events(db_cursor, cohort, save_intermediate: bool) -> pd.Da
 
     transfers = transfers.reset_index().drop("index", axis=1)
 
-    transfers = transfers.rename({"careunit":"concept:name", "intime":"time:timestamp"}, axis=1)
+    transfers = transfers.rename(
+        {"careunit": "concept:name", "intime": "time:timestamp"}, axis=1)
     if save_intermediate:
         filename = get_filename_string("transfer_log", ".csv")
         transfers.to_csv("output/" + filename)

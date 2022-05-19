@@ -1,7 +1,8 @@
 """Provides functionality to generate admission event logs for a given cohort"""
 import logging
 import pandas as pd
-from .helper import (get_filename_string, extract_admissions_for_admission_ids)
+from .extraction_helper import (
+    get_filename_string, extract_admissions_for_admission_ids)
 
 
 logger = logging.getLogger('cli')
@@ -45,7 +46,8 @@ def extract_admission_events(db_cursor, cohort: pd.DataFrame,
     log = pd.DataFrame.from_dict(event_dict, "index")  # type: ignore
     log = log.sort_values("timestamp")
     log = log.reset_index().drop("index", axis=1)
-    log = log.rename({"activity":"concept:name", "timestamp":"time:timestamp"}, axis=1)
+    log = log.rename({"activity": "concept:name",
+                     "timestamp": "time:timestamp"}, axis=1)
 
     if save_intermediate:
         filename = get_filename_string("admission_log", ".csv")

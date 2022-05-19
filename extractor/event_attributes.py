@@ -2,7 +2,7 @@
 import logging
 import warnings
 import pandas as pd
-from .helper import (join_event_attributes_with_log_events)
+from .extraction_helper import (join_event_attributes_with_log_events)
 from .tables import (extract_tables)
 
 warnings.filterwarnings("ignore")

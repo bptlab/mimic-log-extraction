@@ -4,8 +4,10 @@ Provides functionality for extracting a cohort defined by ICD and DRG codes, as 
 import logging
 from typing import List
 import pandas as pd
-from .helper import (extract_admissions_for_admission_ids, extract_patients, get_filename_string,
-                     extract_table_for_admission_ids)
+
+from extractor.constants import ADMISSION_CASE_NOTION, SUBJECT_CASE_NOTION
+from .extraction_helper import (extract_admissions_for_admission_ids, extract_patients,
+                                get_filename_string, extract_table_for_admission_ids)
 
 logger = logging.getLogger('cli')
 
@@ -21,14 +23,14 @@ def extract_case_attributes(db_cursor, cohort: pd.DataFrame, case_notion: str,
 
     logger.info("Begin extracting case attributes!")
     case_attributes = pd.DataFrame()
-    if case_notion == "SUBJECT":
+    if case_notion == SUBJECT_CASE_NOTION:
         subject_df = extract_patients(db_cursor)
         subject_ids = list(cohort["subject_id"].unique())
         subject_df = subject_df.loc[subject_df["subject_id"].isin(subject_ids)]
         case_attribute_list.append("subject_id")
         case_attributes = subject_df[case_attribute_list]
         case_attributes = case_attributes.set_index("subject_id")
-    elif case_notion == "HOSPITAL ADMISSION":
+    elif case_notion == ADMISSION_CASE_NOTION:
         hadm_ids = list(cohort["hadm_id"].unique())
         hadm_ids = [float(i) for i in hadm_ids]
         hadm_df = extract_admissions_for_admission_ids(db_cursor, hadm_ids)

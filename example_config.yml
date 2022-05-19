@@ -8,6 +8,9 @@ event_type: admission
 include_medications: False # only if POE type
 case_notion: hostpital admission
 case_attributes: [] # could be None, too
+low_level_tables: # only if event type OTHER
+    - procedureevents
+    - labevents
 cohort:
     icd_codes: # could also be []
         - M54.5

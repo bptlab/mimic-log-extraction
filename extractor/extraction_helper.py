@@ -174,8 +174,9 @@ def extract_table_for_admission_ids(db_cursor, hospital_admission_ids: List,
     table = pd.DataFrame(table, columns=cols)
     return table
 
+
 def extract_table_for_subject_ids(db_cursor, hospital_subject_ids: List,
-                                    mimic_module: str, table_name: str) -> pd.DataFrame:
+                                  mimic_module: str, table_name: str) -> pd.DataFrame:
     """Extract any table in MIMIC for a list of hospital admission ids"""
     sql_id_list = prepare_id_list_for_sql(hospital_subject_ids)
     sql_query = build_sql_query(mimic_module, table_name, "subject_id")
@@ -279,13 +280,13 @@ detail_tables = {"hcpcsevents": "d_hcpcs", "diagnosis_icd": "d_icd_diagnosis",
                  "procedures_icd": "d_icd_procedures", "labevents": "d_labitems",
                  "chartevents": "d_items", "datetimeevents": "d_items", "inputevents": "d_items",
                  "outputevents": "d_items", "procedureevents": "d_items", "poe": "poe_detail",
-                 "pharmacy": "prescriptions", "emar":"emar_detail"}
+                 "pharmacy": "prescriptions", "emar": "emar_detail"}
 
 detail_foreign_keys = {"d_hcpcs": "code", "d_icd_diagnosis": ["icd_code", "icd_version"],
                        "d_icd_procedures": ["icd_code", "icd_version"],
                        "d_labitems": "itemid", "d_items": "itemid",
                        "poe_detail": ["poe_id", "poe_seq", "subject_id"],
-                       "prescriptions": "pharmacy_id", "emar_detail":"emar_id"}
+                       "prescriptions": "pharmacy_id", "emar_detail": "emar_id"}
 
 illicit_tables = ["d_hcpcs", "d_icd_diagnoses", "d_icd_procedures",
                   "d_labitems", "d_items", "emar_detail", "poe_detail", "edstays",
