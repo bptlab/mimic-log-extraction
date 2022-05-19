@@ -4,13 +4,6 @@ db:
     user: some_db_user
     pw: some_db_password
 save_intermediate: True
-event_type: admission
-include_medications: False # only if POE type
-case_notion: hostpital admission
-case_attributes: [] # could be None, too
-low_level_tables: # only if event type OTHER
-    - procedureevents
-    - labevents
 cohort:
     icd_codes: # could also be []
         - M54.5
@@ -22,3 +15,29 @@ cohort:
     age:
         - 0:25
         - 50:90
+event_type: admission
+include_medications: False # only if POE type
+case_notion: hostpital admission
+case_attributes: [] # could be None, too
+low_level_tables: # only if event type OTHER
+    - procedureevents
+    - labevents
+additional_event_attributes: # could be []
+    - 
+        start_column: a
+        end_column: b
+        time_column: c
+        table_to_aggregate: d
+        column_to_aggregate: f
+        aggregation_method: g
+        filter_column: h # can be omitted
+        filter_values: i # can be omitted
+    -
+        start_column: a
+        end_column: b
+        time_column: c
+        table_to_aggregate: d
+        column_to_aggregate: f
+        aggregation_method: g
+        filter_column: h # can be omitted
+        filter_values: i # can be omitted

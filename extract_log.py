@@ -5,7 +5,7 @@ Provides the main CLI functionality for extracting configurable event logs out o
 """
 import argparse
 import logging
-from typing import Optional
+from typing import List, Optional
 import yaml
 
 from pm4py.objects.conversion.log import converter as log_converter  # type: ignore
@@ -159,49 +159,60 @@ if __name__ == "__main__":
                                       TABLES_ACTIVITIES, TABLES_TIMESTAMPS, SAVE_INTERMEDIATE)
 
     # TODO: add this to config
-    event_attribute_decision = input(ADDITIONAL_ATTRIBUTES_QUESTION)
 
-    while event_attribute_decision.upper() == "Y":
-        start_column, end_column, time_column, table_to_aggregate, column_to_aggregate,\
-            aggregation_method, filter_column, filter_values = ask_event_attributes(args,
-                                                                                    events)
-        events = extract_event_attributes(db_cursor, events, start_column, end_column,
-                                          time_column, table_to_aggregate, column_to_aggregate,
-                                          aggregation_method, filter_column, filter_values)
+    if config is not None and config["additional_event_attributes"] is not None:
+        additional_attributes: List[dict] = config['additional_event_attributes']
+        for attribute in additional_attributes:
+            events = extract_event_attributes(db_cursor, events, attribute['start_column'],
+                                              attribute['end_column'], attribute['time_column'],
+                                              attribute['table_to_aggregate'],
+                                              attribute['column_to_aggregate'],
+                                              attribute['aggregation_method'],
+                                              attribute.get('filter_column'),
+                                              attribute.get('filter_values'))
+    else:
         event_attribute_decision = input(ADDITIONAL_ATTRIBUTES_QUESTION)
-    if event_attribute_decision.upper() != "Y":
-        if SAVE_INTERMEDIATE:
-            csv_filename = get_filename_string(
-                "event_attribute_enhanced_log", ".csv")
-            events.to_csv("output/" + csv_filename)
+        while event_attribute_decision.upper() == "Y":
+            start_column, end_column, time_column, table_to_aggregate, column_to_aggregate,\
+                aggregation_method, filter_column, filter_values = ask_event_attributes(args,
+                                                                                        events)
+            events = extract_event_attributes(db_cursor, events, start_column, end_column,
+                                              time_column, table_to_aggregate, column_to_aggregate,
+                                              aggregation_method, filter_column, filter_values)
+            event_attribute_decision = input(ADDITIONAL_ATTRIBUTES_QUESTION)
 
-        # set case id key based on determined case notion
+    if SAVE_INTERMEDIATE:
+        csv_filename = get_filename_string(
+            "event_attribute_enhanced_log", ".csv")
+        events.to_csv("output/" + csv_filename)
+
+    # set case id key based on determined case notion
+    if determined_case_notion == SUBJECT_CASE_NOTION:
+        CASE_ID_KEY = SUBJECT_CASE_KEY
+    elif determined_case_notion == ADMISSION_CASE_NOTION:
+        CASE_ID_KEY = ADMISSION_CASE_KEY
+
+    # rename every case attribute to have case prefix
+    if case_attribute_list is not None and case_attributes is not None:
+        # join case attr to events
         if determined_case_notion == SUBJECT_CASE_NOTION:
-            CASE_ID_KEY = SUBJECT_CASE_KEY
+            events = events.merge(
+                case_attributes, on=SUBJECT_CASE_KEY, how='left')
         elif determined_case_notion == ADMISSION_CASE_NOTION:
-            CASE_ID_KEY = ADMISSION_CASE_KEY
+            events = events.merge(
+                case_attributes, on=ADMISSION_CASE_KEY, how='left')
 
-        # rename every case attribute to have case prefix
-        if case_attribute_list is not None and case_attributes is not None:
-            # join case attr to events
-            if determined_case_notion == SUBJECT_CASE_NOTION:
-                events = events.merge(
-                    case_attributes, on=SUBJECT_CASE_KEY, how='left')
-            elif determined_case_notion == ADMISSION_CASE_NOTION:
-                events = events.merge(
-                    case_attributes, on=ADMISSION_CASE_KEY, how='left')
+        # rename case id key, as this will be affected too
+        CASE_ID_KEY = 'case:' + CASE_ID_KEY
+        for case_attr in case_attribute_list:
+            events.rename(
+                columns={case_attr: "case:" + case_attr}, inplace=True)
 
-            # rename case id key, as this will be affected too
-            CASE_ID_KEY = 'case:' + CASE_ID_KEY
-            for case_attr in case_attribute_list:
-                events.rename(
-                    columns={case_attr: "case:" + case_attr}, inplace=True)
-
-        parameters = {log_converter.Variants.TO_EVENT_LOG.value
-                      .Parameters.CASE_ID_KEY: CASE_ID_KEY,
-                      log_converter.Variants.TO_EVENT_LOG.value
-                      .Parameters.CASE_ATTRIBUTE_PREFIX: 'case:'}
-        event_log_object = log_converter.apply(
-            events, parameters=parameters, variant=log_converter.Variants.TO_EVENT_LOG)
-        filename = get_filename_string("event_log", ".xes")
-        xes_exporter.apply(event_log_object, "output/" + filename)
+    parameters = {log_converter.Variants.TO_EVENT_LOG.value
+                  .Parameters.CASE_ID_KEY: CASE_ID_KEY,
+                  log_converter.Variants.TO_EVENT_LOG.value
+                  .Parameters.CASE_ATTRIBUTE_PREFIX: 'case:'}
+    event_log_object = log_converter.apply(
+        events, parameters=parameters, variant=log_converter.Variants.TO_EVENT_LOG)
+    filename = get_filename_string("event_log", ".xes")
+    xes_exporter.apply(event_log_object, "output/" + filename)
