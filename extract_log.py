@@ -93,7 +93,7 @@ if __name__ == "__main__":
 
     # Should intermediate dataframes be saved?
     if config is not None and config["save_intermediate"] is not None:
-        SAVE_INTERMEDIATE = config['save_intermediate']
+        SAVE_INTERMEDIATE: bool = config['save_intermediate']
     else:
         SAVE_INTERMEDIATE = args.save_intermediate
 
@@ -169,7 +169,7 @@ if __name__ == "__main__":
                                           time_column, table_to_aggregate, column_to_aggregate,
                                           aggregation_method, filter_column, filter_values)
         event_attribute_decision = input(ADDITIONAL_ATTRIBUTES_QUESTION)
-    if event_attribute_decision.upper() == "N":
+    if event_attribute_decision.upper() != "Y":
         if SAVE_INTERMEDIATE:
             csv_filename = get_filename_string(
                 "event_attribute_enhanced_log", ".csv")
