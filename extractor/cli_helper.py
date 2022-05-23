@@ -113,7 +113,6 @@ def parse_or_ask_cohorts(args: Namespace, config_object: Optional[dict]) -> Tupl
 
 def parse_or_ask_case_notion(args: Namespace, config_object: Optional[dict]) -> str:
     """Ask for case notion: Subject_Id or Hospital_Admission_Id"""
-    # TODO: use ADT to encode case notion
     logger.info("Determining case notion...")
     implemented_case_notions = [SUBJECT_CASE_NOTION, ADMISSION_CASE_NOTION]
 

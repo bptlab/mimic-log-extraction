@@ -9,8 +9,6 @@ from .extraction_helper import (extract_table_for_subject_ids, get_filename_stri
 
 logger = logging.getLogger('cli')
 
-# TODO: add type annotations in method signatures
-
 
 def extract_poe_events(db_cursor: cursor, cohort: pd.DataFrame, include_medications: bool,
                        save_intermediate: bool) -> pd.DataFrame:
