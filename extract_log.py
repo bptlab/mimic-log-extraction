@@ -91,8 +91,8 @@ if __name__ == "__main__":
             config = yaml.safe_load(file)
 
     # Should intermediate dataframes be saved?
-    if config is not None and config["save_intermediate"] is not None:
-        SAVE_INTERMEDIATE: bool = config['save_intermediate']
+    if config is not None and config.get("save_intermediate") is not None:
+        SAVE_INTERMEDIATE: bool = config.get('save_intermediate', False)  # type: ignore
     else:
         SAVE_INTERMEDIATE = args.save_intermediate
 
@@ -133,8 +133,9 @@ if __name__ == "__main__":
     elif event_type == TRANSFER_EVENT_TYPE:
         events = extract_transfer_events(db_cursor, cohort, SAVE_INTERMEDIATE)
     elif event_type == POE_EVENT_TYPE:
-        if config is not None and config["include_medications"] is not None:
-            SHOULD_INCLUDE_MEDICATIONS: bool = config['include_medications']
+        if config is not None and config.get("include_medications") is not None:
+            SHOULD_INCLUDE_MEDICATIONS: bool = config.get(
+                'include_medications', False)
         else:
             include_medications = input(INCLUDE_MEDICATION_QUESTION).upper()
             SHOULD_INCLUDE_MEDICATIONS = include_medications == "Y"
@@ -154,8 +155,9 @@ if __name__ == "__main__":
         events = extract_table_events(db_cursor, cohort, tables_to_extract,
                                       TABLES_ACTIVITIES, TABLES_TIMESTAMPS, SAVE_INTERMEDIATE)
 
-    if config is not None and config["additional_event_attributes"] is not None:
-        additional_attributes: List[dict] = config['additional_event_attributes']
+    if config is not None and config.get("additional_event_attributes") is not None:
+        additional_attributes: List[dict] = config.get(
+            "additional_event_attributes", [])
         for attribute in additional_attributes:
             events = extract_event_attributes(db_cursor, events, attribute['start_column'],
                                               attribute['end_column'], attribute['time_column'],

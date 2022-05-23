@@ -26,7 +26,7 @@ def parse_or_ask_db_settings(args: Namespace,
                              config_object: Optional[dict]) -> Tuple[str, str, str, str]:
     """Parse database config or use flags/ask for input"""
     logger.info("Determining and establishing database connection...")
-    if config_object is not None and config_object["db"] is not None:
+    if config_object is not None and config_object.get("db") is not None:
         db_config = config_object["db"]
         # TODO: check for missing config keys
         input_db_name = db_config["name"]
@@ -60,14 +60,15 @@ def parse_or_ask_cohorts(args: Namespace, config_object: Optional[dict]) -> Tupl
     """Ask for patient cohort filters"""
     logger.info("Determining patient cohort...")
 
-    if config_object is not None and config_object["icd_codes"] is not None:
-        icd_codes = config_object['icd_codes']
+    if config_object is not None and config_object.get("cohort") is not None \
+            and config_object["cohort"].get("icd_codes") is not None:
+        icd_codes = config_object["cohort"]['icd_codes']
         icd_codes = None if icd_codes == [''] else icd_codes
-        icd_version = config_object["icd_version"]
-        icd_seq_num = config_object["icd_seq_num"]
+        icd_version = config_object["cohort"]["icd_version"]
+        icd_seq_num = config_object["cohort"]["icd_seq_num"]
     else:
         icd_string = args.icd if args.icd is not None else str(
-            input("Enter ICD code(s) seperated by comma (Press enter to choose all):\n"))
+            input("Enter ICD code(s) separated by comma (Press enter to choose all):\n"))
         icd_codes = icd_string.split(',')
         icd_codes = None if icd_codes == [''] else icd_codes
 
@@ -78,16 +79,17 @@ def parse_or_ask_cohorts(args: Namespace, config_object: Optional[dict]) -> Tupl
             icd_version = args.icd_version if args.icd_version is not None else int(
                 input("Enter ICD version (9, 10, 0 for both):\n"))
             icd_seq_num = args.icd_sequence_number if args.icd_sequence_number is not None else int(
-                input("Enter considered ranking threshold of \
-                        diagnosis (1 is the highest priority):\n"))
+                input("""Enter considered ranking threshold of diagnosis
+(1 is the highest priority):\n"""))
 
-    if config_object is not None and config_object["drg_codes"] is not None:
-        drg_codes = config_object['drg_codes']
+    if config_object is not None and config_object.get("cohort") is not None\
+            and config_object["cohort"].get("drg_codes") is not None:
+        drg_codes = config_object["cohort"]['drg_codes']
         drg_codes = None if drg_codes == [''] else drg_codes
-        drg_type = config_object["drg_ontology"]
+        drg_type = config_object["cohort"].get("drg_ontology")
     else:
         drg_string = args.drg if args.drg is not None else str(
-            input("Enter DRG code(s) seperated by comma (Press enter to choose all):\n"))
+            input("""Enter DRG code(s) separated by comma (Press enter to choose all):\n"""))
         drg_codes = drg_string.split(',')
         drg_codes = None if drg_codes == [''] else drg_codes
 
@@ -97,11 +99,12 @@ def parse_or_ask_cohorts(args: Namespace, config_object: Optional[dict]) -> Tupl
             drg_type = args.drg_type if args.drg_type is not None else str(
                 input("Enter DRG ontology (HCFA, APR):\n"))
 
-    if config_object is not None and config_object["age"] is not None:
-        ages = config_object['age']
+    if config_object is not None and config_object.get("cohort") is not None \
+            and config_object["cohort"].get("age") is not None:
+        ages = config_object["cohort"]['age']
     else:
         age_string = args.age if args.age is not None else str(
-            input("Enter Patient Age ranges seperated by comma, e.g. 0:20,50:90:\n"))
+            input("""Enter Patient Age ranges separated by comma, e.g. 0:20,50:90:\n"""))
         ages = age_string.split(',')
         ages = None if ages == [''] else ages
 
@@ -114,7 +117,7 @@ def parse_or_ask_case_notion(args: Namespace, config_object: Optional[dict]) -> 
     logger.info("Determining case notion...")
     implemented_case_notions = [SUBJECT_CASE_NOTION, ADMISSION_CASE_NOTION]
 
-    if config_object is not None and config_object["case_notion"] is not None:
+    if config_object is not None and config_object.get("case_notion") is not None:
         case_string = config_object['case_notion']
     else:
         case_string = args.notion if args.notion is not None else str(
@@ -133,14 +136,14 @@ def parse_or_ask_case_attributes(args: Namespace, case_notion: str,
     logger.info("Determining case attributes...")
     logger.info("The following case notion was selected: %s", case_notion)
 
-    if config_object is not None and config_object["case_attributes"] is not None:
+    if config_object is not None and config_object.get("case_attributes") is not None:
         attribute_list = config_object['case_attributes']
         if attribute_list == ['']:
             if case_notion == SUBJECT_CASE_NOTION:
                 attribute_list = subject_case_attributes
             elif case_notion == ADMISSION_CASE_NOTION:
                 attribute_list = hadm_case_attributes
-    elif config_object is not None and config_object['case_attributes'] is None:
+    elif config_object is not None and config_object.get('case_attributes') is None:
         attribute_list = None
     else:
         case_attribute_decision = input(
@@ -154,8 +157,8 @@ def parse_or_ask_case_attributes(args: Namespace, case_notion: str,
                 logger.info('[%s]' % ', '.join(map(str, hadm_case_attributes)))
             attribute_string = args.case_attribute_list if args.case_attribute_list is not None \
                 else str(
-                    input("Enter case attributes seperated by \
-                            comma (Press enter to choose all):\n"))
+                    input("""Enter case attributes separated by comma
+(Press enter to choose all):\n"""))
             attribute_list = attribute_string.split(',')
             if attribute_list == ['']:
                 if case_notion == SUBJECT_CASE_NOTION:
@@ -174,7 +177,7 @@ def parse_or_ask_event_type(args: Namespace, config_object: Optional[dict]) -> s
     implemented_event_types = [ADMISSION_EVENT_TYPE, TRANSFER_EVENT_TYPE,
                                POE_EVENT_TYPE, OTHER_EVENT_TYPE]
 
-    if config_object is not None and config_object["event_type"] is not None:
+    if config_object is not None and config_object.get("event_type") is not None:
         type_string = config_object['event_type']
     else:
         type_string = args.type if args.type is not None else str(
@@ -190,7 +193,7 @@ def parse_or_ask_event_type(args: Namespace, config_object: Optional[dict]) -> s
 def parse_or_ask_low_level_tables(args: Namespace, config_object: Optional[dict]) -> List[str]:
     """Ask for low level tables: Chartevents, Procedureevents, Labevents, ...?"""
     logger.info("Determining low level tables...")
-    if config_object is not None and config_object["low_level_tables"] is not None:
+    if config_object is not None and config_object.get("low_level_tables") is not None:
         table_list = config_object['low_level_tables']
     else:
         table_string = args.tables if args.tables is not None else str(
