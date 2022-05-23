@@ -77,9 +77,10 @@ parser.add_argument('--config', type=str,
 
 # Argument to store intermediate dataframes to disk
 parser.add_argument('--save_intermediate', action='store_true',
-                    help="Store intermediate extraction results as csv. Can be used for extraction debugging.")
+                    help="Store intermediate extraction results as csv. For debugging purposes.")
 parser.add_argument('--ignore_intermediate',
-                    dest='save_intermediate', action='store_false', help="Explicitly disable storing of intermediate results.")
+                    dest='save_intermediate', action='store_false',
+                    help="Explicitly disable storing of intermediate results.")
 parser.set_defaults(save_intermediate=False)
 
 
