@@ -31,7 +31,9 @@ additional_event_attributes: # could be []
         column_to_aggregate: f
         aggregation_method: g
         filter_column: h # can be omitted
-        filter_values: i # can be omitted
+        filter_values:
+            - one
+            - other
     -
         start_column: a
         end_column: b
@@ -40,4 +42,3 @@ additional_event_attributes: # could be []
         column_to_aggregate: f
         aggregation_method: g
         filter_column: h # can be omitted
-        filter_values: i # can be omitted
