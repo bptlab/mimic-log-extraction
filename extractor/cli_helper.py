@@ -142,7 +142,8 @@ def parse_or_ask_case_attributes(args: Namespace, case_notion: str,
                 attribute_list = subject_case_attributes
             elif case_notion == ADMISSION_CASE_NOTION:
                 attribute_list = hadm_case_attributes
-    elif config_object is not None and config_object.get('case_attributes') is None:
+    elif config_object is not None and config_object.get('case_attributes') is None\
+            and config_object.get('prompt_case_attributes') is not True:
         attribute_list = None
     else:
         case_attribute_decision = input(

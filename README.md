@@ -48,9 +48,7 @@ optional arguments:
 ## config file
 
 For providing parameters via a `.yml` config file, provide the path to that file via the `--config` flag.
-This will override any setting provided via prompt or input flag, so be careful. Refer to the `example_config.yml` file
-for how to provide options. The config keys `icd_codes`, `drg_codes`, `additional_event_attributes` need to be explicitly
-set to `[]` in order to not be prompted for during extraction.
+This will override any setting provided via prompt or input flag, so be careful. Refer to the `example_config.yml` file for how to provide options. The config keys `icd_codes`, `drg_codes`, and `additional_event_attributes` need to be explicitly set to `[]` in order to not be prompted for during extraction. `include_medications` only needs to be set for POE event logs to avoid the prompt. When `case_attributes` is set to `[]`, the respective default attributes are used. If the key is not provided, no case attributes are added. To be prompted for it during execution, `prompt_case_attributes` needs to be set to true.
 
 ## installation
 
