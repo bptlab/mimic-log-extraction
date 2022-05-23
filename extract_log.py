@@ -76,9 +76,10 @@ parser.add_argument('--config', type=str,
                     help='Config file for providing all options via file')
 
 # Argument to store intermediate dataframes to disk
-parser.add_argument('--save_intermediate', action='store_true')
+parser.add_argument('--save_intermediate', action='store_true',
+                    help="Store intermediate extraction results as csv. Can be used for extraction debugging.")
 parser.add_argument('--ignore_intermediate',
-                    dest='save_intermediate', action='store_false')
+                    dest='save_intermediate', action='store_false', help="Explicitly disable storing of intermediate results.")
 parser.set_defaults(save_intermediate=False)
 
 
@@ -92,7 +93,8 @@ if __name__ == "__main__":
 
     # Should intermediate dataframes be saved?
     if config is not None and config.get("save_intermediate") is not None:
-        SAVE_INTERMEDIATE: bool = config.get('save_intermediate', False)  # type: ignore
+        SAVE_INTERMEDIATE: bool = config.get(
+            'save_intermediate', False)  # type: ignore
     else:
         SAVE_INTERMEDIATE = args.save_intermediate
 

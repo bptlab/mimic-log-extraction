@@ -8,10 +8,11 @@ A CLI tool for extracting event logs out of MIMIC Databases.
 ## usage
 
 ```bash
-usage: extract_log.py [-h] [--db_name DB_NAME] [--db_host DB_HOST] [--db_user DB_USER] [--db_pw DB_PW] [--subject_ids SUBJECT_IDS] [--hadm_ids HADM_IDS] [--icd ICD]
-                      [--icd_version ICD_VERSION] [--icd_sequence_number ICD_SEQUENCE_NUMBER] [--drg DRG] [--drg_type DRG_TYPE] [--age AGE] [--type TYPE]
-                      [--notion NOTION] [--case_attribute_list CASE_ATTRIBUTE_LIST] [--config CONFIG]
-
+usage: extract_log.py [-h] [--db_name DB_NAME] [--db_host DB_HOST] [--db_user DB_USER] [--db_pw DB_PW] [--subject_ids SUBJECT_IDS]
+                      [--hadm_ids HADM_IDS] [--icd ICD] [--icd_version ICD_VERSION] [--icd_sequence_number ICD_SEQUENCE_NUMBER] [--drg DRG]
+                      [--drg_type DRG_TYPE] [--age AGE] [--type TYPE] [--tables TABLES] [--tables_activities TABLES_ACTIVITIES]
+                      [--tables_timestamps TABLES_TIMESTAMPS] [--notion NOTION] [--case_attribute_list CASE_ATTRIBUTE_LIST] [--config CONFIG]
+                      [--save_intermediate] [--ignore_intermediate]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -31,17 +32,25 @@ optional arguments:
   --drg_type DRG_TYPE   DRG type (HCFA, APR)
   --age AGE             Patient Age of cohort
   --type TYPE           Event Type
+  --tables TABLES       Low level tables
+  --tables_activities TABLES_ACTIVITIES
+                        Activity Columns for Low level tables
+  --tables_timestamps TABLES_TIMESTAMPS
+                        Timestamp Columns for Low level tables
   --notion NOTION       Case Notion
   --case_attribute_list CASE_ATTRIBUTE_LIST
                         Case Attributes
   --config CONFIG       Config file for providing all options via file
+  --save_intermediate   Store intermediate extraction results as csv. Can be used for extraction debugging.
+  --ignore_intermediate
 ```
 
 ## config file
 
 For providing parameters via a `.yml` config file, provide the path to that file via the `--config` flag.
 This will override any setting provided via prompt or input flag, so be careful. Refer to the `example_config.yml` file
-for how to provide options.
+for how to provide options. The config keys `icd_codes`, `drg_codes`, `additional_event_attributes` need to be explicitly
+set to `[]` in order to not be prompted for during extraction.
 
 ## installation
 
