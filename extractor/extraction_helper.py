@@ -2,7 +2,6 @@
 Provides helper methods for extraction of data frames from Mimic
 """
 import logging
-from typing import List, Optional
 from datetime import datetime
 import pandas as pd
 import pandasql as ps

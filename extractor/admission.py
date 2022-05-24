@@ -1,6 +1,5 @@
 """Provides functionality to generate admission event logs for a given cohort"""
 import logging
-from typing import Optional
 import pandas as pd
 from psycopg2.extensions import cursor
 from .extraction_helper import (
