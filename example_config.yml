@@ -4,6 +4,7 @@ db:
     user: some_db_user
     pw: some_db_password
 save_intermediate: True
+csv_log: False # not needed, defaults to False
 cohort:
     icd_codes: # could also be []
         - M54.5

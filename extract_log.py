@@ -83,6 +83,11 @@ parser.add_argument('--ignore_intermediate',
                     help="Explicitly disable storing of intermediate results.")
 parser.set_defaults(save_intermediate=False)
 
+# Argument to store event log as csv instead of xes
+parser.add_argument('--csv_log', action='store_true',
+                    help="Store resulting log as a .csv file instead of as an .xes event log")
+parser.set_defaults(csv_log=False)
+
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -98,6 +103,13 @@ if __name__ == "__main__":
             'save_intermediate', False)  # type: ignore
     else:
         SAVE_INTERMEDIATE = args.save_intermediate
+
+    # Should resulting event log be saved as csv instead of as xes?
+    if config is not None and config.get("csv_log") is not None:
+        SAVE_CSV_LOG: bool = config.get(
+            'csv_log', False)  # type: ignore
+    else:
+        SAVE_CSV_LOG = args.csv_log
 
     # Create database connection
     db_name, db_host, db_user, db_pw = parse_or_ask_db_settings(args, config)
@@ -207,11 +219,15 @@ if __name__ == "__main__":
             events.rename(
                 columns={case_attr: "case:" + case_attr}, inplace=True)
 
-    parameters = {log_converter.Variants.TO_EVENT_LOG.value
-                  .Parameters.CASE_ID_KEY: CASE_ID_KEY,
-                  log_converter.Variants.TO_EVENT_LOG.value
-                  .Parameters.CASE_ATTRIBUTE_PREFIX: 'case:'}
-    event_log_object = log_converter.apply(
-        events, parameters=parameters, variant=log_converter.Variants.TO_EVENT_LOG)
-    filename = get_filename_string("event_log", ".xes")
-    xes_exporter.apply(event_log_object, "output/" + filename)
+    if SAVE_CSV_LOG:
+        filename = get_filename_string("event_log", ".csv")
+        events.to_csv("output/" + filename)
+    else:
+        parameters = {log_converter.Variants.TO_EVENT_LOG.value
+                      .Parameters.CASE_ID_KEY: CASE_ID_KEY,
+                      log_converter.Variants.TO_EVENT_LOG.value
+                      .Parameters.CASE_ATTRIBUTE_PREFIX: 'case:'}
+        event_log_object = log_converter.apply(
+            events, parameters=parameters, variant=log_converter.Variants.TO_EVENT_LOG)
+        filename = get_filename_string("event_log", ".xes")
+        xes_exporter.apply(event_log_object, "output/" + filename)

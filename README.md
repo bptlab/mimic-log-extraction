@@ -41,8 +41,10 @@ optional arguments:
   --case_attribute_list CASE_ATTRIBUTE_LIST
                         Case Attributes
   --config CONFIG       Config file for providing all options via file
-  --save_intermediate   Store intermediate extraction results as csv. Can be used for extraction debugging.
+  --save_intermediate   Store intermediate extraction results as csv. For debugging purposes.
   --ignore_intermediate
+                        Explicitly disable storing of intermediate results.
+  --csv_log             Store resulting log as a .csv file instead of as an .xes event log
 ```
 
 ## config file
