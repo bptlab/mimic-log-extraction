@@ -27,7 +27,7 @@ def extract_event_attributes(db_cursor: cursor, log: pd.DataFrame, start_column:
     hospital_admission_ids = [float(i) for i in hospital_admission_ids]
 
     event_attributes = extract_tables(db_cursor, [table_to_aggregate],
-                                      hospital_admission_ids, None)
+                                      hospital_admission_ids, None, None)
 
     event_attributes = event_attributes.sort_values([case_notion, time_column])
 

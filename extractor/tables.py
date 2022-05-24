@@ -3,12 +3,11 @@ import logging
 from typing import List, Optional
 import pandas as pd
 from psycopg2.extensions import cursor
-from sqlalchemy import false
 from extractor.admission import extract_admission_events
 from .extraction_helper import (extract_table_columns, get_filename_string,
                                 extract_table_for_admission_ids, extract_table,
                                 extract_emergency_department_stays_for_admission_ids,
-                                extract_ed_table_for_ed_stays, get_table_module, 
+                                extract_ed_table_for_ed_stays, get_table_module,
                                 extract_icustay_events, detail_tables, detail_foreign_keys)
 
 
