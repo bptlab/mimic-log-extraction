@@ -2,7 +2,7 @@
 Provides helper methods for extraction of data frames from Mimic
 """
 import logging
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 import pandas as pd
 import pandasql as ps
@@ -197,7 +197,7 @@ def extract_table_columns(db_cursor: cursor, mimic_module: str, table_name: str)
     cols = list(map(lambda x: x[0], db_cursor.description))
     return cols
 
-def extract_icustay_events(db_cursor: cursor, cohort: pd.DataFrame) -> pd.DataFrame:
+def extract_icustay_events(db_cursor: cursor, cohort: Optional[pd.DataFrame]) -> pd.DataFrame:
     """
     Extracts icustay events for a given cohort
     """

@@ -1,5 +1,6 @@
 """Provides functionality to generate admission event logs for a given cohort"""
 import logging
+from typing import Optional
 import pandas as pd
 from psycopg2.extensions import cursor
 from .extraction_helper import (
@@ -9,7 +10,7 @@ from .extraction_helper import (
 logger = logging.getLogger('cli')
 
 
-def extract_admission_events(db_cursor: cursor, cohort: pd.DataFrame,
+def extract_admission_events(db_cursor: cursor, cohort: Optional[pd.DataFrame],
                              save_intermediate: bool) -> pd.DataFrame:
     """
     Extracts admission events for a given cohort
