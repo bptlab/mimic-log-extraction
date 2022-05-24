@@ -102,7 +102,7 @@ def ask_activity_and_time(db_cursor: cursor, table_list: List[str],
 
 
 def extract_tables(db_cursor: cursor, table_list: List[str], hospital_admission_ids: List[float],
-                   chosen_activity_time: Optional[dict], cohort: pd.DataFrame) -> pd.DataFrame:
+                   chosen_activity_time: Optional[dict], cohort: Optional[pd.DataFrame]) -> pd.DataFrame:
     """
     Extracts given tables from the database and generates an event log
     """
