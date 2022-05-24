@@ -12,7 +12,7 @@ logger = logging.getLogger('cli')
 def extract_admission_events(db_cursor: cursor, cohort: pd.DataFrame,
                              save_intermediate: bool) -> pd.DataFrame:
     """
-    Extracts transfer events for a given cohort
+    Extracts admission events for a given cohort
     """
 
     logger.info("Begin extracting admission events!")

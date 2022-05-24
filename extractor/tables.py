@@ -3,11 +3,14 @@ import logging
 from typing import List, Optional
 import pandas as pd
 from psycopg2.extensions import cursor
+from sqlalchemy import false
+from extractor.admission import extract_admission_events
 from .extraction_helper import (extract_table_columns, get_filename_string,
                                 extract_table_for_admission_ids, extract_table,
                                 extract_emergency_department_stays_for_admission_ids,
-                                extract_ed_table_for_ed_stays, get_table_module, detail_tables,
-                                detail_foreign_keys)
+                                extract_ed_table_for_ed_stays, get_table_module, 
+                                extract_icustay_events, detail_tables, detail_foreign_keys)
+
 
 
 logger = logging.getLogger('cli')
@@ -33,7 +36,7 @@ def extract_table_events(db_cursor: cursor, cohort: pd.DataFrame, table_list: Li
         "Extracting events from provided tables. This may take a while...")
 
     final_log = extract_tables(
-        db_cursor, table_list, hospital_admission_ids, chosen_activity_time)
+        db_cursor, table_list, hospital_admission_ids, chosen_activity_time, cohort)
     final_log = final_log.sort_values(["hadm_id", "time:timestamp"])
     if save_intermediate:
         filename = get_filename_string("table_log", ".csv")
@@ -52,7 +55,11 @@ def ask_activity_and_time(db_cursor: cursor, table_list: List[str],
     """
     chosen_activity_time = {}
     for table in table_list:
-        if tables_activities is None and tables_timestamps is None:
+        if table.upper() == "ADMISSIONS":
+            chosen_activity_time[table] = ["concept:name", "time:timestamp"]
+        elif table.upper() == "ICUSTAYS":
+            chosen_activity_time[table] = ["concept:name", "time:timestamp"]
+        elif tables_activities is None and tables_timestamps is None:
             detail_columns = []
             module = get_table_module(table)
 
@@ -96,7 +103,7 @@ def ask_activity_and_time(db_cursor: cursor, table_list: List[str],
 
 
 def extract_tables(db_cursor: cursor, table_list: List[str], hospital_admission_ids: List[float],
-                   chosen_activity_time: Optional[dict]) -> pd.DataFrame:
+                   chosen_activity_time: Optional[dict], cohort: pd.DataFrame) -> pd.DataFrame:
     """
     Extracts given tables from the database and generates an event log
     """
@@ -116,6 +123,10 @@ def extract_tables(db_cursor: cursor, table_list: List[str], hospital_admission_
                 db_cursor, ed_stay_list, table)
             table_content = table_content.merge(
                 ed_stays, on=["stay_id", "subject_id"], how="inner")
+        elif table.upper() == "ADMISSIONS":
+            table_content = extract_admission_events(db_cursor, cohort, False)
+        elif table.upper() == "ICUSTAYS":
+            table_content = extract_icustay_events(db_cursor, cohort)
         else:
             table_content = extract_table_for_admission_ids(
                 db_cursor, hospital_admission_ids, module, table)

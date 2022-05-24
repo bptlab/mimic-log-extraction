@@ -197,6 +197,41 @@ def extract_table_columns(db_cursor: cursor, mimic_module: str, table_name: str)
     cols = list(map(lambda x: x[0], db_cursor.description))
     return cols
 
+def extract_icustay_events(db_cursor: cursor, cohort: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extracts icustay events for a given cohort
+    """
+
+    hospital_admission_ids = list(cohort["hadm_id"].unique())
+    hospital_admission_ids = [float(i) for i in hospital_admission_ids]
+
+    icu_stays = extract_table_for_admission_ids(db_cursor, hospital_admission_ids,\
+                                                "mimic_icu", "icustays")
+
+    event_dict = {}
+    i = 0
+    for _, row in icu_stays.iterrows():
+        column_labels = ["intime", "outtime"]
+        for col in icu_stays.columns:
+            if col in column_labels:
+                if pd.isna(row[col]):
+                    continue
+                if col == "intime":
+                    activity = "ICU in"
+                elif col == "outtime":
+                    activity = "ICU out"
+                new_row = {"hadm_id": row["hadm_id"], "subject_id": row["subject_id"],
+                           "activity": activity, "timestamp": row[col]}
+                event_dict[i] = new_row
+                i = i + 1
+
+    log = pd.DataFrame.from_dict(event_dict, "index")  # type: ignore
+    log = log.sort_values("timestamp")
+    log = log.reset_index().drop("index", axis=1)
+    log = log.rename({"activity": "concept:name",
+                     "timestamp": "time:timestamp"}, axis=1)
+
+    return log
 
 def get_table_module(table_name: str) -> str:
     """Provides module for a given table name"""
@@ -282,5 +317,4 @@ detail_foreign_keys = {"d_hcpcs": "code", "d_icd_diagnosis": ["icd_code", "icd_v
                        "prescriptions": "pharmacy_id", "emar_detail": "emar_id"}
 
 illicit_tables = ["d_hcpcs", "d_icd_diagnoses", "d_icd_procedures",
-                  "d_labitems", "d_items", "emar_detail", "poe_detail", "edstays",
-                  "icustays"]
+                  "d_labitems", "d_items", "emar_detail", "poe_detail", "edstays"]

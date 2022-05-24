@@ -1,0 +1,48 @@
+db:
+    name: mimic
+    host: 127.0.0.1
+    user: postgres
+    pw: 1234
+save_intermediate: False
+cohort:
+    icd_codes: # could also be []
+        - 150
+        - 151
+        - 152
+        - 153
+        - 154
+    icd_version: 9
+    icd_seq_num: 1
+    drg_codes: [] # could also be a list
+    drg_ontology: APR
+    age:
+        - 0:25
+        - 50:90
+event_type: admission
+include_medications: False # only if POE type
+case_notion: hospital admission
+case_attributes: [] # could also be None. [] uses default case attributes
+prompt_case_attributes: False # setting true forces case attributes to be determined if not provided
+low_level_tables: # only if event type OTHER
+    - procedureevents
+    - labevents
+additional_event_attributes: # could be []
+    - 
+        start_column: a
+        end_column: b
+        time_column: c
+        table_to_aggregate: d
+        column_to_aggregate: f
+        aggregation_method: g
+        filter_column: h # can be omitted
+        filter_values:
+            - one
+            - other
+    -
+        start_column: a
+        end_column: b
+        time_column: c
+        table_to_aggregate: d
+        column_to_aggregate: f
+        aggregation_method: g
+        filter_column: h # can be omitted
