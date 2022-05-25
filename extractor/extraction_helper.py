@@ -111,7 +111,8 @@ def filter_icd_df(icds: pd.DataFrame, icd_filter_list: List[str], icd_version: i
 
     cond_list = tuple(cond_list) # type: ignore
 
-    icd_filter = icd_filter.loc[icd_filter["icd_code"].str.startswith(cond_list, na=False)] # type: ignore
+    icd_filter = icd_filter.loc[icd_filter["icd_code"].str.startswith(cond_list, \
+                                na=False)] # type: ignore
 
     return icd_filter
 
