@@ -82,7 +82,7 @@ def extract_cohort(db_cursor: cursor, icd_codes: Optional[List[str]], icd_versio
     cohort.drop(["admittime", "admityear", "anchor_age",
                 "anchor_year"], axis=1, inplace=True)
 
-    if ages is None or ages == ['']:
+    if ages is None or ages == [''] or ages == []:
         # select all patients
         logger.info("No age filter supplied.")
     else:
