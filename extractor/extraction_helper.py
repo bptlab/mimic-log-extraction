@@ -70,7 +70,7 @@ def filter_age_ranges(cohort: pd.DataFrame, ages: List[str]) -> pd.DataFrame:
 
 def filter_icd_df(icds: pd.DataFrame, icd_filter_list: List[str], icd_version: int) -> pd.DataFrame:
     """Filter a dataframe for a list of supplied ICD codes"""
-    icds["icd_code"] = icds["icd_code"].str.replace(" ", "")
+    icds["icd_code"] = icds["icd_code"].str.replace(" ", "") # type: ignore
     if icd_version != 0:
         icd_filter = icds.loc[icds["icd_version"] == icd_version]
     else:
@@ -96,7 +96,7 @@ def filter_icd_df(icds: pd.DataFrame, icd_filter_list: List[str], icd_version: i
                     cond_list.append(string)
             else:
                 #icd 10 - if len of string < 2 fill up with zeroes
-                char = char[0]
+                char = char[0] # type: ignore
                 first = first[1:]
                 second = second[1:]
                 for i in range(int(first), int(second)+1):
@@ -104,14 +104,14 @@ def filter_icd_df(icds: pd.DataFrame, icd_filter_list: List[str], icd_version: i
                     string = str(i)
                     if length < 2:
                         string = "0" + string
-                    string = char + string
+                    string = char + string # type: ignore
                     cond_list.append(string)
         else:
             cond_list.append(icd_filter_element)
 
-    cond_list = tuple(cond_list)
+    cond_list = tuple(cond_list) # type: ignore
 
-    icd_filter = icd_filter.loc[icd_filter["icd_code"].str.startswith(cond_list, na=False)]
+    icd_filter = icd_filter.loc[icd_filter["icd_code"].str.startswith(cond_list, na=False)] # type: ignore
 
     return icd_filter
 
