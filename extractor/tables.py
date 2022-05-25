@@ -147,6 +147,8 @@ def extract_tables(db_cursor: cursor, table_list: List[str], hospital_admission_
             else:
                 detail_content = extract_table(db_cursor, module, detail_table)
             detail_foreign_key = detail_foreign_keys[detail_table]
+            if table.lower() == "hcpcsevents":
+                table_content.rename(columns={"hcpcs_cd":"code"}, inplace=True)
             table_content = table_content.merge(detail_content,                    # type: ignore
                                                 on=detail_foreign_key, how="left")  # type: ignore
 

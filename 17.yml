@@ -20,6 +20,7 @@ cohort:
         - 239
     icd_version: 9
     icd_seq_num: 100
+    drg_codes: []
     drg_ontology: APR
     age:
         - 0:100

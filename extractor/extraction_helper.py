@@ -111,7 +111,7 @@ def filter_icd_df(icds: pd.DataFrame, icd_filter_list: List[str], icd_version: i
 
     cond_list = tuple(cond_list) # type: ignore
 
-    icd_filter = icd_filter.loc[icd_filter["icd_code"].str.startswith(cond_list, \
+    icd_filter = icd_filter.loc[icd_filter["icd_code"].str.startswith(cond_list, # type: ignore
                                 na=False)] # type: ignore
 
     return icd_filter
@@ -350,7 +350,8 @@ detail_tables = {"hcpcsevents": "d_hcpcs", "diagnosis_icd": "d_icd_diagnosis",
                  "outputevents": "d_items", "procedureevents": "d_items", "poe": "poe_detail",
                  "pharmacy": "prescriptions", "emar": "emar_detail"}
 
-detail_foreign_keys = {"d_hcpcs": "code", "d_icd_diagnosis": ["icd_code", "icd_version"],
+detail_foreign_keys = {"d_hcpcs": ["code", "short_description"], 
+                       "d_icd_diagnosis": ["icd_code", "icd_version"],
                        "d_icd_procedures": ["icd_code", "icd_version"],
                        "d_labitems": "itemid", "d_items": "itemid",
                        "poe_detail": ["poe_id", "poe_seq", "subject_id"],
