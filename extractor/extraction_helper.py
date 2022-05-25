@@ -350,7 +350,7 @@ detail_tables = {"hcpcsevents": "d_hcpcs", "diagnosis_icd": "d_icd_diagnosis",
                  "outputevents": "d_items", "procedureevents": "d_items", "poe": "poe_detail",
                  "pharmacy": "prescriptions", "emar": "emar_detail"}
 
-detail_foreign_keys = {"d_hcpcs": ["code", "short_description"], 
+detail_foreign_keys = {"d_hcpcs": ["code", "short_description"],
                        "d_icd_diagnosis": ["icd_code", "icd_version"],
                        "d_icd_procedures": ["icd_code", "icd_version"],
                        "d_labitems": "itemid", "d_items": "itemid",
