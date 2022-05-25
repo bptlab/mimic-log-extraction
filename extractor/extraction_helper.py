@@ -4,9 +4,11 @@ Provides helper methods for extraction of data frames from Mimic
 import logging
 from typing import List
 from datetime import datetime
+import re
 import pandas as pd
 import pandasql as ps
 from psycopg2.extensions import cursor
+
 
 logger = logging.getLogger('cli')
 
@@ -68,12 +70,49 @@ def filter_age_ranges(cohort: pd.DataFrame, ages: List[str]) -> pd.DataFrame:
 
 def filter_icd_df(icds: pd.DataFrame, icd_filter_list: List[str], icd_version: int) -> pd.DataFrame:
     """Filter a dataframe for a list of supplied ICD codes"""
+    icds["icd_code"] = icds["icd_code"].str.replace(" ", "")
     if icd_version != 0:
         icd_filter = icds.loc[icds["icd_version"] == icd_version]
     else:
         icd_filter = icds
-    icd_filter = icd_filter.loc[icd_filter["icd_code"].str.contains(
-        '|'.join(icd_filter_list))]
+
+    cond_list = []
+
+    for icd_filter_element in icd_filter_list:
+        icd_filter_element = str(icd_filter_element)
+        if ":" in icd_filter_element:
+            first = icd_filter_element.split(":")[0]
+            second = icd_filter_element.split(":")[1]
+            char = re.search('[a-zA-Z]', first)
+            if char is None:
+                #icd 9 - if len of string < 3 fill up with zeroes
+                for i in range(int(first), int(second)+1):
+                    length = len(str(i))
+                    string = str(i)
+                    if length == 1:
+                        string = "00" + string
+                    elif length == 2:
+                        string = "0" + string
+                    cond_list.append(string)
+            else:
+                #icd 10 - if len of string < 2 fill up with zeroes
+                char = char[0]
+                first = first[1:]
+                second = second[1:]
+                for i in range(int(first), int(second)+1):
+                    length = len(str(i))
+                    string = str(i)
+                    if length < 2:
+                        string = "0" + string
+                    string = char + string
+                    cond_list.append(string)
+        else:
+            cond_list.append(icd_filter_element)
+
+    cond_list = tuple(cond_list)
+
+    icd_filter = icd_filter.loc[icd_filter["icd_code"].str.startswith(cond_list, na=False)]
+
     return icd_filter
 
 
