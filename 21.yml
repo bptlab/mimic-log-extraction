@@ -27,7 +27,13 @@ event_type: other
 case_notion: hospital admission
 case_attributes: [] # could also be None. [] uses default case attributes
 low_level_tables: # only if event type OTHER
-    - admissions
-    - icustays
+    - procedureevents
+    - inputevents
+low_level_activities:
+    - ordercategoryname
+    - category
+low_level_timestamps:
+    - starttime
+    - starttime
 
 additional_event_attributes: [] # could be []

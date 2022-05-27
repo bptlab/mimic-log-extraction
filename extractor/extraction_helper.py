@@ -119,6 +119,7 @@ def filter_icd_df(icds: pd.DataFrame, icd_filter_list: List[str], icd_version: i
 
 def filter_drg_df(hf_drg: pd.DataFrame, drg_filter_list: List[str]) -> pd.DataFrame:
     """Filter a dataframe for a list of supplied DRG codes"""
+    drg_filter_list = [str(i) for i in drg_filter_list]
     hf_filter = hf_drg.loc[hf_drg["drg_code"].isin(
         drg_filter_list)]
     return hf_filter
@@ -311,7 +312,7 @@ def join_event_attributes_with_log_events(log: pd.DataFrame, event_attributes: p
     select *
     from event_attributes
     inner join log on event_attributes.''' + case_notion + '''=log.''' + case_notion + '''
-    where event_attributes.''' + time_column + ''' >= log.''' + start_column + '''
+    where event_attributes.''' + time_column + ''' >= log."''' + start_column + '''"
     and event_attributes.''' + time_column + ''' <= log.''' + end_column
 
     joined_df = ps.sqldf(sqlcode, locals())

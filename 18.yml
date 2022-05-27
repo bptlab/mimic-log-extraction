@@ -23,11 +23,7 @@ cohort:
     drg_codes: []
     drg_ontology: APR
     age: []
-event_type: other
+event_type: admission
 case_notion: hospital admission
 case_attributes: [] # could also be None. [] uses default case attributes
-low_level_tables: # only if event type OTHER
-    - admissions
-    - icustays
-
 additional_event_attributes: [] # could be []

@@ -161,10 +161,14 @@ if __name__ == "__main__":
         tables_to_extract = parse_or_ask_low_level_tables(args, config)
         if args.tables_activities is not None:
             TABLES_ACTIVITIES = args.tables_activities.split(',')
+        elif config is not None and config.get("low_level_activities") is not None:
+            TABLES_ACTIVITIES = config.get("low_level_activities")
         else:
             TABLES_ACTIVITIES = None
         if args.tables_timestamps is not None:
             TABLES_TIMESTAMPS = args.tables_timestamps.split(',')
+        elif config is not None and config.get("low_level_timestamps") is not None:
+            TABLES_TIMESTAMPS = config.get("low_level_timestamps")
         else:
             TABLES_TIMESTAMPS = None
         events = extract_table_events(db_cursor, cohort, tables_to_extract,

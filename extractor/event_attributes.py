@@ -20,9 +20,9 @@ def extract_event_attributes(db_cursor: cursor, log: pd.DataFrame, start_column:
     """
     Extracts event attributes for a given event log
     """
+
     case_notion = "hadm_id"
     logger.info("Begin extracting event attributes!")
-
     hospital_admission_ids = list(log[case_notion].unique())
     hospital_admission_ids = [float(i) for i in hospital_admission_ids]
 
@@ -33,7 +33,6 @@ def extract_event_attributes(db_cursor: cursor, log: pd.DataFrame, start_column:
 
     joined_df = join_event_attributes_with_log_events(log, event_attributes, case_notion,
                                                       time_column, start_column, end_column)
-
     aggregation_dict = {}
     for col in column_to_aggregate:
         aggregation_dict[col] = aggregation_method
