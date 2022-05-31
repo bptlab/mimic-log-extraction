@@ -119,7 +119,8 @@ if __name__ == "__main__":
     # Determine Cohort
     if args.subject_ids is None and args.hadm_ids is None:
         cohort_icd_codes, cohort_icd_version, cohort_icd_seq_num, cohort_drg_codes, \
-            cohort_drg_type, cohort_age = parse_or_ask_cohorts(args, config)
+            cohort_drg_type, cohort_age, \
+            cohort_icd_codes_intersection = parse_or_ask_cohorts(args, config)
     # Determine case notion
     determined_case_notion = parse_or_ask_case_notion(args, config)
 
@@ -133,7 +134,7 @@ if __name__ == "__main__":
     if args.subject_ids is None and args.hadm_ids is None:
         cohort = extract_cohort(db_cursor, cohort_icd_codes, cohort_icd_version,
                                 cohort_icd_seq_num, cohort_drg_codes, cohort_drg_type,
-                                cohort_age, SAVE_INTERMEDIATE)
+                                cohort_age, cohort_icd_codes_intersection, SAVE_INTERMEDIATE)
     else:
         cohort = extract_cohort_for_ids(
             db_cursor, args.subject_ids, args.hadm_ids, SAVE_INTERMEDIATE)

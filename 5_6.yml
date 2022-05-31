@@ -42,9 +42,52 @@ additional_event_attributes:
         column_to_aggregate: 
             - valuenum
         aggregation_method: mean
-        filter_column: label # can be omitted
+        filter_column: label
         filter_values:
             - Glucose
             - Potassium
             - Sodium
             - Chloride
+            - Creatinine
+            - Urea Nitrogen
+            - Bicarbonate
+            - Anion Gap
+            - Magnesium
+            - Phosphate
+            - Calcium
+            - Hematocrit
+            - Hemoglobin
+            - Platelet Count
+            - White Blood Cells
+            - MCV
+            - MCHC
+            - MCH
+            - Red Blood Cells
+            - RDW
+            - PTT
+            - INR(PT)
+            - PT
+            - pH
+            - RDW-SD
+            - pO2
+            - Sodium
+            - Chloride
+    - 
+        start_column: time:timestamp
+        end_column: outtime
+        time_column: charttime
+        table_to_aggregate: chartevents
+        column_to_aggregate: 
+            - valuenum
+        aggregation_method: mean
+        filter_column: label
+        filter_values:
+            - Non Invasive Blood Pressure diastolic
+            - Non Invasive Blood Pressure systolic
+            - Heart Rate
+            - Temperature Fahrenheit
+            - O2 saturation pulseoxymetry
+            - Respiratory Rate
+            - GCS - Eye Opening
+            - GCS - Verbal Response
+            - GCS - Motor Response

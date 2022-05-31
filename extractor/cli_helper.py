@@ -56,6 +56,7 @@ def parse_or_ask_cohorts(args: Namespace, config_object: Optional[dict]) -> Tupl
         Optional[List[str]], Optional[int],
         Optional[int], Optional[List[str]],
         Optional[str],
+        Optional[List[str]],
         Optional[List[str]]]:
     """Ask for patient cohort filters"""
     logger.info("Determining patient cohort...")
@@ -66,12 +67,16 @@ def parse_or_ask_cohorts(args: Namespace, config_object: Optional[dict]) -> Tupl
         icd_codes = None if icd_codes in ([''], []) else icd_codes
         icd_version = config_object["cohort"]["icd_version"]
         icd_seq_num = config_object["cohort"]["icd_seq_num"]
+        try:
+            icd_codes_intersection = config_object["cohort"]["icd_codes_intersection"]
+        except KeyError:
+            icd_codes_intersection = None
     else:
         icd_string = args.icd if args.icd is not None else str(
             input("Enter ICD code(s) separated by comma (Press enter to choose all):\n"))
         icd_codes = icd_string.split(',')
         icd_codes = None if icd_codes in ([''], []) else icd_codes
-
+        icd_codes_intersection = None
         if icd_codes is None:
             icd_version = None
             icd_seq_num = None
@@ -108,7 +113,7 @@ def parse_or_ask_cohorts(args: Namespace, config_object: Optional[dict]) -> Tupl
         ages = age_string.split(',')
         ages = None if ages == [''] else ages
 
-    return icd_codes, icd_version, icd_seq_num, drg_codes, drg_type, ages
+    return icd_codes, icd_version, icd_seq_num, drg_codes, drg_type, ages, icd_codes_intersection
 
 
 def parse_or_ask_case_notion(args: Namespace, config_object: Optional[dict]) -> str:

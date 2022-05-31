@@ -1,0 +1,65 @@
+db:
+    name: postgres
+    host: 127.0.0.1
+    user: postgres
+    pw: 1234
+save_intermediate: True
+cohort:
+    icd_codes: # congestive heart failure
+        - 4280
+    icd_codes_intersection: # diabetes
+        - E119
+        - E1122
+        - 3572
+        - E1165
+        - E1140
+        - E1151
+        - E11319
+        - E1142
+        - E1121
+        - E11649
+    icd_version: 0
+    icd_seq_num: 100
+    drg_codes: []
+    drg_ontology: APR
+    age: []
+event_type: other
+case_notion: hospital admission
+case_attributes: [] # could also be None. [] uses default case attributes
+low_level_tables: # only if event type OTHER
+    - admissions
+    - icustays
+    - transfers
+    - chartevents
+    - datetimeevents
+    - outputevents
+    - microbiologyevents
+    - labevents
+    - pharmacy
+    - inputevents
+    - procedures_icd
+low_level_activities:
+    - Default
+    - Default
+    - careunit
+    - label
+    - label
+    - label
+    - test_name
+    - label
+    - medication
+    - label
+    - long_title
+low_level_timestamps:
+    - Default
+    - Default
+    - intime
+    - charttime
+    - charttime
+    - charttime
+    - charttime
+    - charttime
+    - starttime
+    - starttime
+    - chartdate
+additional_event_attributes: [] # could be []

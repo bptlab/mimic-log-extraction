@@ -50,12 +50,12 @@ def extract_cohort_for_ids(db_cursor: cursor, subjects: Optional[str], admission
 def extract_cohort(db_cursor: cursor, icd_codes: Optional[List[str]], icd_version: Optional[int],
                    icd_seq_num: Optional[int], drg_codes: Optional[List[str]],
                    drg_type: Optional[str], ages: Optional[List[str]],
+                   icd_codes_intersection: Optional[List[str]],
                    save_intermediate: bool) -> pd.DataFrame:
     """
     Selects a cohort of patient filtered by age,
     as well as ICD and DRG codes.
     """
-
     logger.info("Begin extracting cohort!")
 
     if icd_codes is None:
@@ -104,9 +104,25 @@ def extract_cohort(db_cursor: cursor, icd_codes: Optional[List[str]], icd_versio
         icd_cohort = icd_cohort.reset_index().drop("index", axis=1)
         icd_cohort = icd_cohort[["hadm_id", "icd_code"]].groupby(
             "hadm_id").agg(list).reset_index()
-        cohort = cohort.loc[cohort["hadm_id"].isin(
-            list(icd_cohort["hadm_id"]))]
-        cohort = cohort.merge(icd_cohort, on="hadm_id", how="inner")
+        if icd_codes_intersection is not None:
+            icd_cohort_2 = filter_icd_df(icds=icds, icd_filter_list=icd_codes_intersection,
+                                   icd_version=icd_version)
+            icd_cohort_2 = icd_cohort_2.loc[icd_cohort_2["seq_num"] <= icd_seq_num]
+            icd_cohort_2 = icd_cohort_2.reset_index().drop("index", axis=1)
+            icd_cohort_2 = icd_cohort_2[["hadm_id", "icd_code"]].groupby(
+            "hadm_id").agg(list).reset_index()
+            intersection_list = set(list(icd_cohort["hadm_id"])).intersection\
+                                (set(list(icd_cohort_2["hadm_id"])))
+            icd_cohort = pd.concat([icd_cohort, icd_cohort_2])
+            icd_cohort.drop_duplicates("hadm_id", inplace=True)
+            cohort = cohort.loc[cohort["hadm_id"].isin(intersection_list)]
+            cohort = cohort.merge(icd_cohort, on="hadm_id", how="inner")
+        else:
+            cohort = cohort.loc[cohort["hadm_id"].isin(list(icd_cohort["hadm_id"]))]
+            cohort = cohort.merge(icd_cohort, on="hadm_id", how="inner")
+
+
+
 
     # Filter for relevant DRG codes
     if drg_codes is not None and drg_type is not None:
