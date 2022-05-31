@@ -1,4 +1,4 @@
-# mimic-log-extraction-tool
+# mimic-log-extraction
 
 [![Pylint](https://github.com/bptlab/mimic-log-extraction/actions/workflows/pylint.yml/badge.svg)](https://github.com/bptlab/mimic-log-extraction/actions/workflows/pylint.yml) [![Typecheck](https://github.com/bptlab/mimic-log-extraction/actions/workflows/mypy.yml/badge.svg)](https://github.com/bptlab/mimic-log-extraction/actions/workflows/mypy.yml)
 
