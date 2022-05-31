@@ -14,7 +14,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install mypy==0.940
+        pip install -e .[dev]
     - name: Analysing the code with pylint
       run: |
         mypy --config-file mypy.ini .
