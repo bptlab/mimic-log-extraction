@@ -26,6 +26,7 @@ optional arguments:
                         Subject IDs of cohort
   --hadm_ids HADM_IDS   Hospital Admission IDs of cohort
   --icd ICD             ICD code(s) of cohort
+  --icd_codes_intersection Optional argument, if one wants to filter for disease combinations, such that patients have to have an icd code from icd_codes and from icd_codes_intersection
   --icd_version ICD_VERSION
                         ICD version
   --icd_sequence_number ICD_SEQUENCE_NUMBER
@@ -66,6 +67,9 @@ cohort:
     icd_codes: # could also be [] to avoid ICD filtering. Omitting makes the tool prompt for input.
         - some ICD code
         - ...
+    icd_codes_intersection: # optional argument, if one wants to filter for disease combinations, such that patients have to have an icd code from icd_codes and from icd_codes_intersection
+        - some ICD code
+        - ...   
     icd_version: 10 # 9, 10, 0
     icd_seq_num: 1
     drg_codes: [] # could also contain keys to filter for DRG codes. Omitting makes the tool prompt for input. 
