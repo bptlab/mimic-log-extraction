@@ -114,7 +114,7 @@ def extract_cohort(db_cursor: cursor, icd_codes: Optional[List[str]], icd_versio
             intersection_list = set(list(icd_cohort["hadm_id"])).intersection\
                                 (set(list(icd_cohort_2["hadm_id"])))
             icd_cohort = pd.concat([icd_cohort, icd_cohort_2])
-            icd_cohort.drop_duplicates("hadm_id", inplace=True)
+            icd_cohort.drop_duplicates("hadm_id", inplace=True) # type: ignore
             cohort = cohort.loc[cohort["hadm_id"].isin(intersection_list)]
             cohort = cohort.merge(icd_cohort, on="hadm_id", how="inner")
         else:
