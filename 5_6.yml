@@ -54,7 +54,7 @@ additional_event_attributes:
             - Anion Gap
             - Magnesium
             - Phosphate
-            - Calcium
+            - Calcium, Total
             - Hematocrit
             - Hemoglobin
             - Platelet Count
@@ -70,8 +70,6 @@ additional_event_attributes:
             - pH
             - RDW-SD
             - pO2
-            - Sodium
-            - Chloride
     - 
         start_column: time:timestamp
         end_column: outtime
