@@ -84,9 +84,15 @@ include_medications: False # False, True. Only needed if POE event_type
 case_notion: hospital admission # subject, hospital admission
 case_attributes: [] # could also be None. [] uses default case attributes for case notion.
 prompt_case_attributes: False # False, True. Setting True forces case attributes to be determined if not provided
-low_level_tables: # Only if event type OTHER.
-    - procedureevents
+low_level_tables: # only if event type OTHER
+    - pharmacy
     - labevents
+low_level_activities:
+    - medication
+    - label
+low_level_timestamps:
+    - starttime
+    - charttime
 additional_event_attributes: # Can be set to []. Omitting makes the tool prompt for input
     - 
         start_column: a
