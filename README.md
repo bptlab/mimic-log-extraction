@@ -120,7 +120,7 @@ additional_event_attributes: # Can be set to []. Omitting makes the tool prompt 
 Simply run the pip installation command to install the extraction tool:
 
 ```bash
-pip install git+https://gitlab.hpi.de/finn.klessascheck/mimic-log-extraction-tool
+pip install git+https://github.com/bptlab/mimic-log-extraction/
 ```
 
 Alternatively, clone this repo and execute
