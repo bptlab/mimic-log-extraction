@@ -30,4 +30,15 @@ cohort:
 event_type: Transfer
 case_notion: hospital admission
 case_attributes: [] # could also be None. [] uses default case attributes
-additional_event_attributes: [] # could be []
+additional_event_attributes: 
+    - 
+        start_column: time:timestamp
+        end_column: outtime
+        time_column: starttime
+        table_to_aggregate: pharmacy
+        column_to_aggregate: 
+            - pharmacy_id
+        aggregation_method: count
+        filter_column: medication
+        filter_values:
+            - Furosemide
