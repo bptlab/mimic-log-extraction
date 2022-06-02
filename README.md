@@ -66,6 +66,12 @@ db:
 save_intermediate: True # True, False
 csv_log: False # True, defaults to False
 cohort:
+    subject_ids: # Omitting does not consider subject_ids
+        - some subject_ids
+        - ...
+    hadm_ids: # Omitting does not consider hadm_ids
+        - some hadm_ids
+        - ...
     icd_codes: # could also be [] to avoid ICD filtering. Omitting makes the tool prompt for input.
         - some ICD code
         - ...
