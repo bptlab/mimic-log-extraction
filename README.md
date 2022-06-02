@@ -52,6 +52,20 @@ optional arguments:
   --csv_log             Store resulting log as a .csv file instead of as an .xes event log
 ```
 
+Call the tool via
+
+```bash
+python3 -m extract_log <...>
+```
+
+passing the required parameters.
+
+If you installed the tool via cloning this repository, you should instead execute
+
+```bash
+python3 ./extract_log.py <...>
+```
+
 ## config file
 
 For providing parameters via a `.yml` config file, provide the path to that file via the `--config` flag.
