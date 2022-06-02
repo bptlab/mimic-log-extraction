@@ -41,4 +41,10 @@ setup(
         ]
     },
     include_package_data=True,
+    setup_requires=['wheel'],
+    entry_points={
+    'console_scripts': [
+        'extract_log = extract_log.main',
+        ],
+    },
 )

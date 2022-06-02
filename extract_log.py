@@ -89,7 +89,8 @@ parser.add_argument('--csv_log', action='store_true',
 parser.set_defaults(csv_log=False)
 
 
-if __name__ == "__main__":
+def main():
+    """Main method for extracting event logs"""
     args = parser.parse_args()
 
     config: Optional[dict] = None
@@ -250,3 +251,6 @@ if __name__ == "__main__":
             events, parameters=parameters, variant=log_converter.Variants.TO_EVENT_LOG)
         filename = get_filename_string("event_log", ".xes")
         xes_exporter.apply(event_log_object, "output/" + filename)
+
+if __name__ == '__main__':
+    main()
