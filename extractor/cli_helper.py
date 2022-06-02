@@ -57,11 +57,30 @@ def parse_or_ask_cohorts(args: Namespace, config_object: Optional[dict]) -> Tupl
         Optional[int], Optional[List[str]],
         Optional[str],
         Optional[List[str]],
+        Optional[List[str]],
+        Optional[List[str]],
         Optional[List[str]]]:
     """Ask for patient cohort filters"""
     logger.info("Determining patient cohort...")
 
-    if config_object is not None and config_object.get("cohort") is not None \
+    icd_codes = None
+    icd_version = None
+    icd_seq_num = None
+    subject_ids = None
+    hadm_ids = None
+    icd_version = None
+    drg_codes = None
+    drg_type = None
+    ages = None
+    icd_codes_intersection = None
+
+    if config_object is not None and config_object["cohort"].get("subject_ids") is not None:
+        subject_ids = config_object["cohort"].get("subject_ids")
+        subject_ids = [str(subject_id) for subject_id in subject_ids]
+    elif config_object is not None and config_object["cohort"].get("hadm_ids") is not None:
+        hadm_ids = config_object["cohort"].get("hadm_ids")
+        hadm_ids = [str(hadm_id) for hadm_id in hadm_ids]
+    elif config_object is not None and config_object.get("cohort") is not None \
             and config_object["cohort"].get("icd_codes") is not None:
         icd_codes = config_object["cohort"]['icd_codes']
         icd_codes = None if icd_codes in ([''], []) else icd_codes
@@ -113,7 +132,8 @@ def parse_or_ask_cohorts(args: Namespace, config_object: Optional[dict]) -> Tupl
         ages = age_string.split(',')
         ages = None if ages == [''] else ages
 
-    return icd_codes, icd_version, icd_seq_num, drg_codes, drg_type, ages, icd_codes_intersection
+    return icd_codes, icd_version, icd_seq_num, drg_codes, drg_type, ages, icd_codes_intersection,\
+           subject_ids, hadm_ids
 
 
 def parse_or_ask_case_notion(args: Namespace, config_object: Optional[dict]) -> str:
