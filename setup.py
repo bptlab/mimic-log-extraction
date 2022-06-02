@@ -44,7 +44,7 @@ setup(
     setup_requires=['wheel'],
     entry_points={
     'console_scripts': [
-        'extract_log = extract_log.main',
+        'extract_log = extract_log:main',
         ],
     },
 )
