@@ -100,17 +100,17 @@ def main():
 
     # Should intermediate dataframes be saved?
     if config is not None and config.get("save_intermediate") is not None:
-        SAVE_INTERMEDIATE: bool = config.get(
+        save_intermediate: bool = config.get(
             'save_intermediate', False)  # type: ignore
     else:
-        SAVE_INTERMEDIATE = args.save_intermediate
+        save_intermediate = args.save_intermediate
 
     # Should resulting event log be saved as csv instead of as xes?
     if config is not None and config.get("csv_log") is not None:
-        SAVE_CSV_LOG: bool = config.get(
+        save_csv_log: bool = config.get(
             'csv_log', False)  # type: ignore
     else:
-        SAVE_CSV_LOG = args.csv_log
+        save_csv_log = args.csv_log
 
     # Create database connection
     db_name, db_host, db_user, db_pw = parse_or_ask_db_settings(args, config)
@@ -137,58 +137,58 @@ def main():
     and cohort_subject_ids is None and cohort_hadm_ids is None:
         cohort = extract_cohort(db_cursor, cohort_icd_codes, cohort_icd_version,
                                 cohort_icd_seq_num, cohort_drg_codes, cohort_drg_type,
-                                cohort_age, cohort_icd_codes_intersection, SAVE_INTERMEDIATE)
+                                cohort_age, cohort_icd_codes_intersection, save_intermediate)
     else:
         if cohort_subject_ids is not None or cohort_hadm_ids is not None:
             if cohort_subject_ids is not None:
-                SUBJECT_INPUT = ",".join(cohort_subject_ids)
+                subject_input = ",".join(cohort_subject_ids)
             else:
-                SUBJECT_INPUT = cohort_subject_ids # type: ignore
+                subject_input = cohort_subject_ids # type: ignore
             if cohort_hadm_ids is not None:
-                HADM_INPUT = ",".join(cohort_hadm_ids)
+                hadm_input = ",".join(cohort_hadm_ids)
             else:
-                HADM_INPUT = cohort_hadm_ids # type: ignore
+                hadm_input = cohort_hadm_ids # type: ignore
             cohort = extract_cohort_for_ids(
-            db_cursor, SUBJECT_INPUT, HADM_INPUT, SAVE_INTERMEDIATE)
+            db_cursor, subject_input, hadm_input, save_intermediate)
         else:
             cohort = extract_cohort_for_ids(
-                db_cursor, args.subject_ids, args.hadm_ids, SAVE_INTERMEDIATE)
+                db_cursor, args.subject_ids, args.hadm_ids, save_intermediate)
 
     # extract case attributes
     if case_attribute_list is not None:
         case_attributes = extract_case_attributes(
-            db_cursor, cohort, determined_case_notion, case_attribute_list, SAVE_INTERMEDIATE)
+            db_cursor, cohort, determined_case_notion, case_attribute_list, save_intermediate)
 
     if event_type == ADMISSION_EVENT_TYPE:
-        events = extract_admission_events(db_cursor, cohort, SAVE_INTERMEDIATE)
+        events = extract_admission_events(db_cursor, cohort, save_intermediate)
     elif event_type == TRANSFER_EVENT_TYPE:
-        events = extract_transfer_events(db_cursor, cohort, SAVE_INTERMEDIATE)
+        events = extract_transfer_events(db_cursor, cohort, save_intermediate)
     elif event_type == POE_EVENT_TYPE:
         if config is not None and config.get("include_medications") is not None:
-            SHOULD_INCLUDE_MEDICATIONS: bool = config.get(
+            should_include_medications: bool = config.get(
                 'include_medications', False)
         else:
             include_medications = input(INCLUDE_MEDICATION_QUESTION).upper()
-            SHOULD_INCLUDE_MEDICATIONS = include_medications == "Y"
+            should_include_medications = include_medications == "Y"
 
         events = extract_poe_events(
-            db_cursor, cohort, SHOULD_INCLUDE_MEDICATIONS, SAVE_INTERMEDIATE)
+            db_cursor, cohort, should_include_medications, save_intermediate)
     elif event_type == OTHER_EVENT_TYPE:
         tables_to_extract = parse_or_ask_low_level_tables(args, config)
         if args.tables_activities is not None:
-            TABLES_ACTIVITIES = args.tables_activities.split(',')
+            tables_activities = args.tables_activities.split(',')
         elif config is not None and config.get("low_level_activities") is not None:
-            TABLES_ACTIVITIES = config.get("low_level_activities")
+            tables_activities = config.get("low_level_activities")
         else:
-            TABLES_ACTIVITIES = None
+            tables_activities = None
         if args.tables_timestamps is not None:
-            TABLES_TIMESTAMPS = args.tables_timestamps.split(',')
+            tables_timestamps = args.tables_timestamps.split(',')
         elif config is not None and config.get("low_level_timestamps") is not None:
-            TABLES_TIMESTAMPS = config.get("low_level_timestamps")
+            tables_timestamps = config.get("low_level_timestamps")
         else:
-            TABLES_TIMESTAMPS = None
+            tables_timestamps = None
         events = extract_table_events(db_cursor, cohort, tables_to_extract,
-                                      TABLES_ACTIVITIES, TABLES_TIMESTAMPS, SAVE_INTERMEDIATE)
+                                      tables_activities, tables_timestamps, save_intermediate)
 
     if config is not None and config.get("additional_event_attributes") is not None:
         additional_attributes: List[dict] = config.get(
@@ -212,16 +212,16 @@ def main():
                                               aggregation_method, filter_column, filter_values)
             event_attribute_decision = input(ADDITIONAL_ATTRIBUTES_QUESTION)
 
-    if SAVE_INTERMEDIATE:
+    if save_intermediate:
         csv_filename = get_filename_string(
             "event_attribute_enhanced_log", ".csv")
         events.to_csv("output/" + csv_filename)
 
     # set case id key based on determined case notion
     if determined_case_notion == SUBJECT_CASE_NOTION:
-        CASE_ID_KEY = SUBJECT_CASE_KEY
+        case_id_key = SUBJECT_CASE_KEY
     elif determined_case_notion == ADMISSION_CASE_NOTION:
-        CASE_ID_KEY = ADMISSION_CASE_KEY
+        case_id_key = ADMISSION_CASE_KEY
 
     # rename every case attribute to have case prefix
     if case_attribute_list is not None and case_attributes is not None:
@@ -234,17 +234,17 @@ def main():
                 case_attributes, on=ADMISSION_CASE_KEY, how='left')
 
         # rename case id key, as this will be affected too
-        CASE_ID_KEY = 'case:' + CASE_ID_KEY
+        case_id_key = 'case:' + case_id_key
         for case_attr in case_attribute_list:
             events.rename(
                 columns={case_attr: "case:" + case_attr}, inplace=True)
 
-    if SAVE_CSV_LOG:
+    if save_csv_log:
         filename = get_filename_string("event_log", ".csv")
         events.to_csv("output/" + filename)
     else:
         parameters = {log_converter.Variants.TO_EVENT_LOG.value
-                      .Parameters.CASE_ID_KEY: CASE_ID_KEY,
+                      .Parameters.CASE_ID_KEY: case_id_key,
                       log_converter.Variants.TO_EVENT_LOG.value
                       .Parameters.CASE_ATTRIBUTE_PREFIX: 'case:'}
         event_log_object = log_converter.apply(
