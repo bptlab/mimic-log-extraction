@@ -11,7 +11,7 @@ The official python documentation provides a [good overview](https://docs.python
 
 ## usage
 
-```bash
+```
 usage: extract_log.py [-h] [--db_name DB_NAME] [--db_host DB_HOST] [--db_user DB_USER] [--db_pw DB_PW] [--subject_ids SUBJECT_IDS]
                       [--hadm_ids HADM_IDS] [--icd ICD] [--icd_version ICD_VERSION] [--icd_sequence_number ICD_SEQUENCE_NUMBER] [--drg DRG]
                       [--drg_type DRG_TYPE] [--age AGE] [--type TYPE] [--tables TABLES] [--tables_activities TABLES_ACTIVITIES]
