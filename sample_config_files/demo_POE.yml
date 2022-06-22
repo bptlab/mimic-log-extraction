@@ -5,7 +5,7 @@ db:
     pw: 1234
 save_intermediate: False
 cohort:
-    icd_codes: # congestive heart failure
+    icd_codes:
         - 42821
         - 42823
         - 42831
