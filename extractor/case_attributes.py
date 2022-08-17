@@ -36,13 +36,13 @@ def extract_case_attributes(db_cursor: cursor, cohort: pd.DataFrame, case_notion
         cohort_data = cohort[["hadm_id", "age", "gender"]]
         hadm_df = hadm_df.merge(cohort_data, on="hadm_id", how="inner")
         icd_codes = extract_table_for_admission_ids(db_cursor, hadm_ids,
-                                                    "mimic_hosp", "diagnoses_icd")
+                                                    "mimiciv_hosp", "diagnoses_icd")
         icd_codes = icd_codes.sort_values(["hadm_id", "seq_num"])
         icd_codes = icd_codes[["hadm_id", "icd_code"]]
         icd_codes = icd_codes.groupby(
             "hadm_id")["icd_code"].apply(list)  # type: ignore
         drg_codes = extract_table_for_admission_ids(
-            db_cursor, hadm_ids, "mimic_hosp", "drgcodes")
+            db_cursor, hadm_ids, "mimiciv_hosp", "drgcodes")
         drg_codes = drg_codes[["hadm_id", "drg_code"]]
         drg_codes = drg_codes.groupby(
             "hadm_id")["drg_code"].apply(list)  # type: ignore

@@ -15,7 +15,7 @@ logger = logging.getLogger('cli')
 
 def extract_icd_descriptions(db_cursor: cursor) -> pd.DataFrame:
     """Extract ICD Codes and descriptions"""
-    db_cursor.execute("SELECT * FROM mimic_hosp.d_icd_diagnoses")
+    db_cursor.execute("SELECT * FROM mimiciv_hosp.d_icd_diagnoses")
     desc_icd = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
     desc_icd_df = pd.DataFrame(desc_icd, columns=cols)
@@ -25,7 +25,7 @@ def extract_icd_descriptions(db_cursor: cursor) -> pd.DataFrame:
 
 def extract_icds(db_cursor: cursor) -> pd.DataFrame:
     """Extract ICD Codes"""
-    db_cursor.execute('SELECT * FROM mimic_hosp.diagnoses_icd')
+    db_cursor.execute('SELECT * FROM mimiciv_hosp.diagnoses_icd')
     icds = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
     return pd.DataFrame(icds, columns=cols)
@@ -33,7 +33,7 @@ def extract_icds(db_cursor: cursor) -> pd.DataFrame:
 
 def extract_drgs(db_cursor: cursor) -> pd.DataFrame:
     """Extract DRG Codes"""
-    db_cursor.execute("SELECT * from mimic_hosp.drgcodes")
+    db_cursor.execute("SELECT * from mimiciv_hosp.drgcodes")
     drgs = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
     return pd.DataFrame(drgs, columns=cols)
@@ -41,7 +41,7 @@ def extract_drgs(db_cursor: cursor) -> pd.DataFrame:
 
 def extract_admissions(db_cursor: cursor) -> pd.DataFrame:
     """Extract admissions"""
-    db_cursor.execute('SELECT * FROM mimic_core.admissions')
+    db_cursor.execute('SELECT * FROM mimiciv_hosp.admissions')
     adm = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
     return pd.DataFrame(adm, columns=cols)
@@ -49,7 +49,7 @@ def extract_admissions(db_cursor: cursor) -> pd.DataFrame:
 
 def extract_patients(db_cursor: cursor) -> pd.DataFrame:
     """Extract patients"""
-    db_cursor.execute("SELECT * from mimic_core.patients")
+    db_cursor.execute("SELECT * from mimiciv_hosp.patients")
     patients = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
     return pd.DataFrame(patients, columns=cols)
@@ -162,7 +162,7 @@ def extract_admissions_for_admission_ids(db_cursor: cursor,
                                          hospital_admission_ids: List) -> pd.DataFrame:
     """Extract admissions for a list of hospital admission ids"""
     sql_id_list = prepare_id_list_for_sql(hospital_admission_ids)
-    sql_query = build_sql_query("mimic_core", "admissions", "hadm_id")
+    sql_query = build_sql_query("mimiciv_hosp", "admissions", "hadm_id")
     db_cursor.execute(sql_query.format(sql_id_list))
     adm = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
@@ -173,7 +173,7 @@ def extract_transfers_for_admission_ids(db_cursor: cursor,
                                         hospital_admission_ids: List) -> pd.DataFrame:
     """Extract transfers for a list of hospital admission ids"""
     sql_id_list = prepare_id_list_for_sql(hospital_admission_ids)
-    sql_query = build_sql_query("mimic_core", "transfers", "hadm_id")
+    sql_query = build_sql_query("mimiciv_hosp", "transfers", "hadm_id")
     db_cursor.execute(sql_query.format(sql_id_list))
     transfers = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
@@ -184,13 +184,13 @@ def extract_poe_for_admission_ids(db_cursor: cursor,
                                   hospital_admission_ids: List) -> pd.DataFrame:
     """Extract provider order entries for a list of hospital admission ids"""
     sql_id_list = prepare_id_list_for_sql(hospital_admission_ids)
-    sql_query = build_sql_query("mimic_hosp", "poe", "hadm_id")
+    sql_query = build_sql_query("mimiciv_hosp", "poe", "hadm_id")
     db_cursor.execute(sql_query.format(sql_id_list))
     poe = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
     poe_df = pd.DataFrame(poe, columns=cols)
     db_cursor.execute(
-        'SELECT * FROM mimic_hosp.poe_detail')
+        'SELECT * FROM mimiciv_hosp.poe_detail')
     poe_d = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
     poe_d_df = pd.DataFrame(poe_d, columns=cols)
@@ -247,7 +247,7 @@ def extract_icustay_events(db_cursor: cursor, cohort: pd.DataFrame) -> pd.DataFr
     hospital_admission_ids = [float(i) for i in hospital_admission_ids]
 
     icu_stays = extract_table_for_admission_ids(db_cursor, hospital_admission_ids,\
-                                                "mimic_icu", "icustays")
+                                                "mimiciv_icu", "icustays")
 
     event_dict = {}
     i = 0
@@ -276,12 +276,10 @@ def extract_icustay_events(db_cursor: cursor, cohort: pd.DataFrame) -> pd.DataFr
 
 def get_table_module(table_name: str) -> str:
     """Provides module for a given table name"""
-    if table_name in core_tables:
-        module = "mimic_core"
-    elif table_name in hosp_tables:
-        module = "mimic_hosp"
+    if table_name in hosp_tables:
+        module = "mimiciv_hosp"
     elif table_name in icu_tables:
-        module = "mimic_icu"
+        module = "mimiciv_icu"
     elif table_name in ed_tables:
         module = "mimic_ed"
 
@@ -329,15 +327,13 @@ subject_case_attributes = ["gender", "anchor_age",
 
 hadm_case_attributes = ["admittime", "dischtime", "deathtime", "admission_type",
                         "admission_location", "discharge_location", "insurance",
-                        "language", "marital_status", "ethnicity", "edregtime",
+                        "language", "marital_status", "race", "edregtime",
                         "edouttime", "hospital_expire_flag", "gender", "age",
                         "icd_code", "drg_code"]
 
-core_tables = ["admissions", "patients", "transfers"]
-
 hosp_tables = ["diagnoses_icd", "drgcodes", "emar", "hcpcsevents", "labevents",
                "microbiologyevents", "pharmacy", "poe", "prescriptions",
-               "procedures_icd", "services"]
+               "procedures_icd", "services", "admissions", "patients", "transfers"]
 
 icu_tables = ["chartevents", "datetimeevents", "icustays", "inputevents",
               "outputevents", "procedureevents"]
