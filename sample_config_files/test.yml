@@ -1,0 +1,40 @@
+db:
+    name: postgres
+    host: 127.0.0.1
+    user: postgres
+    pw: 1234
+save_intermediate: False
+cohort:
+    icd_codes: 
+        - 42821
+        - 42823
+        - 42831
+        - 42833
+        - 42841
+        - 42843
+        - I5021
+        - I5023
+        - I5031
+        - I5033
+        - I5041
+        - I5042
+        - I5043
+        - I5811
+        - I5813
+    icd_version: 0
+    icd_seq_num: 3
+    drg_codes: 
+        - 194
+    drg_ontology: APR
+    age: []
+event_type: Other
+case_notion: hospital admission
+case_attributes: [] # could also be None. [] uses default case attributes
+low_level_tables: # only if event type OTHER
+    - procedureevents
+low_level_activities:
+    - secondaryordercategoryname
+low_level_timestamps:
+    - starttime
+additional_event_attributes: [] # could be []
+csv_log: True

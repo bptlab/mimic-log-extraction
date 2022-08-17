@@ -24,16 +24,16 @@ def extract_poe_events(db_cursor: cursor, cohort: pd.DataFrame, include_medicati
 
     if include_medications is True:
         pharmacy = extract_table_for_admission_ids(db_cursor, hospital_admission_ids,
-                                                   'mimic_hosp', 'pharmacy')
+                                                   'mimiciv_hosp', 'pharmacy')
         prescriptions = extract_table_for_admission_ids(db_cursor, hospital_admission_ids,
-                                                        'mimic_hosp', 'prescriptions')
+                                                        'mimiciv_hosp', 'prescriptions')
         prescriptions = prescriptions[['pharmacy_id', 'drug_type', 'drug', 'gsn', 'ndc',
                                        'prod_strength', 'form_rx', 'dose_val_rx',
                                        'dose_unit_rx', 'form_val_disp', 'form_unit_disp']]
         emar = extract_table_for_admission_ids(db_cursor, hospital_admission_ids,
-                                               'mimic_hosp', "emar")
+                                               'mimiciv_hosp', "emar")
         emar_subject_ids = list(emar["subject_id"].unique())
-        emar_detail = extract_table_for_subject_ids(db_cursor, emar_subject_ids, 'mimic_hosp',
+        emar_detail = extract_table_for_subject_ids(db_cursor, emar_subject_ids, 'mimiciv_hosp',
                                                     "emar_detail")
         emar = emar.merge(emar_detail, on=["emar_id", "subject_id", "emar_seq", "pharmacy_id"],
                           how="left")
