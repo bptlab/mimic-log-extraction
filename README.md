@@ -2,7 +2,7 @@
 
 [![Pylint](https://github.com/bptlab/mimic-log-extraction/actions/workflows/pylint.yml/badge.svg)](https://github.com/bptlab/mimic-log-extraction/actions/workflows/pylint.yml) [![Typecheck](https://github.com/bptlab/mimic-log-extraction/actions/workflows/mypy.yml/badge.svg)](https://github.com/bptlab/mimic-log-extraction/actions/workflows/mypy.yml)
 
-A CLI tool for extracting event logs out of MIMIC Databases.
+A CLI tool for extracting event logs out of MIMIC Databases. This branch is for MIMIC-IV 1.0. If you use MIMIC-IV 2.0, please pull from the respective branch: https://github.com/bptlab/mimic-log-extraction/tree/mimic-2.0
 
 - requires python 3.8.10 (newer versions might be fine, though)
 - using a python virtual environment seems like a good idea
