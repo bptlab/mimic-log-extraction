@@ -113,8 +113,8 @@ def main():
         save_csv_log = args.csv_log
 
     # Create database connection
-    db_name, db_host, db_user, db_pw = parse_or_ask_db_settings(args, config)
-    db_connection = create_db_connection(db_name, db_host, db_user, db_pw)
+    db_name, db_host, db_user, db_pw, db_port = parse_or_ask_db_settings(args, config)
+    db_connection = create_db_connection(db_name, db_host, db_port, db_user, db_pw)
     db_cursor = db_connection.cursor()
 
     # Determine Cohort

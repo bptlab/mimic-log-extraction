@@ -23,7 +23,7 @@ logger = logging.getLogger('cli')
 
 
 def parse_or_ask_db_settings(args: Namespace,
-                             config_object: Optional[dict]) -> Tuple[str, str, str, str]:
+                             config_object: Optional[dict]) -> Tuple[str, str, str, str, str]:
     """Parse database config or use flags/ask for input"""
     logger.info("Determining and establishing database connection...")
     if config_object is not None and config_object.get("db") is not None:
@@ -33,6 +33,7 @@ def parse_or_ask_db_settings(args: Namespace,
         input_db_host = db_config["host"]
         input_db_user = db_config["user"]
         input_db_password = db_config["pw"]
+        input_db_port = db_config["port"]
     else:
         input_db_name = args.db_name if args.db_name is not None else str(
             input("Enter Database Name:\n"))
@@ -42,12 +43,13 @@ def parse_or_ask_db_settings(args: Namespace,
             input("Enter Database User:\n"))
         input_db_password = args.db_pw if args.db_pw is not None else str(
             input("Enter Database Password:\n"))
-    return input_db_name, input_db_host, input_db_user, input_db_password
+        input_db_port = 5432
+    return input_db_name, input_db_host, input_db_user, input_db_password, input_db_port
 
 
-def create_db_connection(name: str, host: str, user: str, password: str) -> connection:
+def create_db_connection(name: str, host: str, port: str, user: str, password: str) -> connection:
     """Create database connection with supplied parameters"""
-    con = connect(dbname=name, host=host, user=user, password=password)
+    con = connect(dbname=name, host=host, port=port, user=user, password=password)
     con.set_client_encoding('utf8')
     return con
 
