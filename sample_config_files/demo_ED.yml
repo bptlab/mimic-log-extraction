@@ -6,30 +6,35 @@ db:
 save_intermediate: False
 cohort:
     icd_codes: 
-        - N170
-        - N179
-        - N178
-        - N171
-        - N172
-        - 5849
-        - 5845
-        - 5848
-        - 5847
+        - 42821
+        - 42823
+        - 42831
+        - 42833
+        - 42841
+        - 42843
+        - I5021
+        - I5023
+        - I5031
+        - I5033
+        - I5041
+        - I5042
+        - I5043
+        - I5811
+        - I5813
     icd_version: 0
     icd_seq_num: 3
-    drg_codes: []
+    drg_codes: 
+        - 194
     drg_ontology: APR
     age: []
 event_type: Other
 case_notion: hospital admission
+case_attributes: [] # could also be None. [] uses default case attributes
 low_level_tables: # only if event type OTHER
-    - procedureevents
-    - chartevents
+    - pyxis
 low_level_activities:
-    - label
-    - category
+    - name
 low_level_timestamps:
-    - starttime
-    - storetime
+    - charttime
 additional_event_attributes: [] # could be []
 csv_log: True

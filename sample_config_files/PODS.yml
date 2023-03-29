@@ -1,0 +1,51 @@
+db:
+    name: postgres
+    host: 127.0.0.1
+    user: postgres
+    pw: 1234
+save_intermediate: True
+csv_log: False
+cohort:
+    icd_codes: 
+    - 42823
+    - 42833
+    - 42821
+    - 42843 
+    - 42841  
+    - 42831  
+    - I5033  
+    - I5031  
+    - I5021
+    - I5043
+    - I5023
+    - I5042
+    - I5041
+    icd_version: 0
+    icd_seq_num: 3
+    drg_codes: 
+    - 190
+    - 194
+    - 201
+    - 207
+    drg_ontology: APR
+    age: []
+case_notion: hospital admission
+case_attributes: 
+    - admission_location
+    - discharge_location
+event_type: transfer
+additional_event_attributes: 
+    - 
+        start_column: time:timestamp
+        end_column: outtime
+        time_column: charttime
+        table_to_aggregate: labevents
+        column_to_aggregate: 
+            - valuenum
+        aggregation_method: mean
+        filter_column: label
+        filter_values:
+            - Urea Nitrogen
+            - Bicarbonate
+            - Hematocrit
+

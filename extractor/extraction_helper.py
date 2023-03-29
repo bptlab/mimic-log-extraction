@@ -139,7 +139,7 @@ def extract_ed_table_for_ed_stays(db_cursor: cursor, ed_stays: List,
                                   table_name: str) -> pd.DataFrame:
     """Extract emergency department table for a list of ed stays"""
     sql_id_list = prepare_id_list_for_sql(ed_stays)
-    sql_query = build_sql_query("mimic_ed", table_name, "stay_id")
+    sql_query = build_sql_query("mimiciv_ed", table_name, "stay_id")
     db_cursor.execute(sql_query.format(sql_id_list))
     ed_table = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
@@ -151,7 +151,7 @@ def extract_emergency_department_stays_for_admission_ids(db_cursor: cursor,
                                                          ) -> pd.DataFrame:
     """Extract ed stays for a list of hospital admission ids"""
     sql_id_list = prepare_id_list_for_sql(hospital_admission_ids)
-    sql_query = build_sql_query("mimic_ed", "edstays", "hadm_id")
+    sql_query = build_sql_query("mimiciv_ed", "edstays", "hadm_id")
     db_cursor.execute(sql_query.format(sql_id_list))
     ed_stays = db_cursor.fetchall()
     cols = list(map(lambda x: x[0], db_cursor.description))
@@ -281,7 +281,7 @@ def get_table_module(table_name: str) -> str:
     elif table_name in icu_tables:
         module = "mimiciv_icu"
     elif table_name in ed_tables:
-        module = "mimic_ed"
+        module = "mimiciv_ed"
 
     return module
 
@@ -333,9 +333,9 @@ hadm_case_attributes = ["admittime", "dischtime", "deathtime", "admission_type",
 
 hosp_tables = ["diagnoses_icd", "drgcodes", "emar", "hcpcsevents", "labevents",
                "microbiologyevents", "pharmacy", "poe", "prescriptions",
-               "procedures_icd", "services", "admissions", "patients", "transfers"]
+               "procedures_icd", "services", "admissions", "patients", "transfers", "omr"]
 
-icu_tables = ["chartevents", "datetimeevents", "icustays", "inputevents",
+icu_tables = ["chartevents", "datetimeevents", "icustays", "inputevents", "ingredientevents",
               "outputevents", "procedureevents"]
 
 ed_tables = ["diagnosis", "edstays", "medrecon table", "pyxis",

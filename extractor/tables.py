@@ -114,7 +114,7 @@ def extract_tables(db_cursor: cursor, table_list: List[str], hospital_admission_
 
         module = get_table_module(table)
 
-        if module == "mimic_ed":
+        if module == "mimiciv_ed":
             ed_stays = extract_emergency_department_stays_for_admission_ids(
                 db_cursor, hospital_admission_ids)
             ed_stays = ed_stays[["subject_id", "hadm_id", "stay_id"]]
